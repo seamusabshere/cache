@@ -35,6 +35,10 @@ or this might even work...
 
     Cache.config.client = Rails.cache
 
+== TTL
+
+0 means don't expire.
+
 == Rationale
 
 * I am so tired of rescuing from Memcached::NotFound

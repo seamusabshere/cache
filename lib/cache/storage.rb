@@ -57,7 +57,34 @@ module Cache
     end
     
     def bare_client
-      Config.instance.client
+      if @pid == ::Process.pid
+        fork_detected = false
+      else
+        fork_detected = true
+        ::Thread.current[:cache_storage_bare_client] = nil
+        @pid = ::Process.pid
+      end
+      ::Thread.current[:cache_storage_bare_client] ||= fresh_bare_client(fork_detected)
+    end
+    
+    def fresh_bare_client(fork_detected)
+      if defined?(::Dalli) and Config.instance.client.is_a?(::Dalli::Client)
+        Config.instance.client.close if fork_detected
+        Config.instance.client
+      elsif defined?(::ActiveSupport::Cache::DalliStore) and Config.instance.client.is_a?(::ActiveSupport::Cache::DalliStore)
+        Config.instance.client.reset if fork_detected
+        Config.instance.client
+      elsif defined?(::Memcached) and (Config.instance.client.is_a?(::Memcached) or Config.instance.client.is_a?(::Memcached::Rails))
+        Config.instance.client.clone
+      elsif defined?(::Redis) and Config.instance.client.is_a?(::Redis)
+        Config.instance.client.client.connect if fork_detected
+        Config.instance.client
+      elsif defined?(::MemCache) and Config.instance.client.is_a?(::MemCache)
+        Config.instance.client.reset if fork_detected
+        Config.instance.client
+      else
+        raise "Don't know how to thread/fork #{Config.instance.client.inspect}"
+      end
     end
   end
 end

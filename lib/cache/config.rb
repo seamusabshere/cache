@@ -27,7 +27,7 @@ module Cache
     end
 
     def client #:nodoc:
-      @client || raise("You need to set Cache.config.client with a cache client of your choice")
+      @client 
     end
     
     # TTL for method caches. Defaults to 60 seconds.
