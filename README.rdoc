@@ -2,6 +2,8 @@
 
 A unified cache handling interface, inspired (but simpler than) Perl's Cache::Cache[http://cpan.uwinnipeg.ca/module/Cache::Cache] and CHI[http://cpan.uwinnipeg.ca/module/CHI].
 
+Takes care of exceptions like Memcached::NotFound and also forking/threading.
+
 == Methods
 
 * get
@@ -38,6 +40,12 @@ or this might even work...
 == TTL
 
 0 means don't expire.
+
+== Forking/threading
+
+As long as you set <tt>Cache.config.client=</tt> and use <tt>Cache.set</tt>, <tt>Cache.get</tt>, etc., you don't have to worry about forking/threading.
+
+For example, you don't have to set up unicorn or PhusionPassenger's <tt>after_fork</tt>.
 
 == Rationale
 
