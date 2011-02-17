@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["seamus@abshere.net"]
   s.homepage    = "https://github.com/seamusabshere/cache"
   s.summary     = %q{Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, including forking}
-  s.description = %q{A unified cache handling interface, inspired by (but simpler than) Perl's Cache::Cache}
+  s.description = %q{A unified cache handling interface for Ruby, inspired by (but simpler than) Perl's Cache::Cache}
 
   s.rubyforge_project = "cache"
 
