@@ -1,0 +1,52 @@
+= cache
+
+A unified cache handling interface, inspired (but simpler than) Perl's Cache::Cache[http://cpan.uwinnipeg.ca/module/Cache::Cache] and CHI[http://cpan.uwinnipeg.ca/module/CHI].
+
+== Methods
+
+* get
+* set
+* delete
+* flush
+
+== Supported clients
+
+Supported memcached clients:
+
+* memcached[https://github.com/fauna/memcached] (either a Memcached or a Memcached::Rails)
+* dalli[https://github.com/mperham/dalli] (either a Dalli::Client or an ActiveSupport::Cache::DalliStore)
+* memcache-client[https://github.com/mperham/memcache-client] (MemCache, the one commonly used by Rails)
+
+Supported Redis clients:
+
+* redis[https://github.com/ezmobius/redis-rb]
+
+== Configuration
+
+You set your preferred cache client:
+
+    Cache.config.client = Memcached.new '127.0.0.1:11211'
+
+or
+
+    Cache.config.client = Redis.new
+
+or this might even work...
+
+    Cache.config.client = Rails.cache
+
+== Rationale
+
+* I am so tired of rescuing from Memcached::NotFound
+* I am so tired of forgetting whether it's :expires_in or :ttl
+* I don't know why we ever started using read/write instead of get/set.
+
+== Currently unsupported
+
+* cas
+* fetch
+* incr
+
+== Copyright
+
+Copyright 2011 Seamus Abshere
