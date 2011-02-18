@@ -1,42 +1,63 @@
 require 'cache/version'
-module Cache
+class Cache
   autoload :Config, 'cache/config'
   autoload :Storage, 'cache/storage'
-  
-  def self.config #:nodoc:
-    Config.instance
+
+  # Create a new Cache object by passing it a client of your choice.
+  #
+  # Supported memcached clients:
+  # * memcached[https://github.com/fauna/memcached] (either a Memcached or a Memcached::Rails)
+  # * dalli[https://github.com/mperham/dalli] (either a Dalli::Client or an ActiveSupport::Cache::DalliStore)
+  # * memcache-client[https://github.com/mperham/memcache-client] (MemCache, the one commonly used by Rails)
+  #
+  # Supported Redis clients:
+  # * redis[https://github.com/ezmobius/redis-rb]
+  #
+  # Example:
+  #     raw_client = Memcached.new('127.0.0.1:11211')
+  #     cache = Cache.new raw_client
+  def initialize(client)
+    config.client = client
+  end
+
+  def config #:nodoc:
+    @config ||= Config.new self
+  end
+
+  def storage #:nodoc:
+    @storage ||= Storage.new self
   end
 
   # Get a value.
   #
   # Example:
-  #     Cache.get 'hello'
-  def self.get(k)
-    Storage.instance.get k
+  #     cache.get 'hello'
+  def get(k)
+    storage.get k
   end
   
   # Store a value. Note that this will Marshal it.
   #
   # Example:
-  #     Cache.set 'hello', 'world'
-  #     Cache.set 'hello', 'world', 80 # seconds til it expires
-  def self.set(k, v, ttl = nil)
-    Storage.instance.set k, v, ttl
+  #     cache.set 'hello', 'world'
+  #     cache.set 'hello', 'world', 80 # seconds til it expires
+  def set(k, v, ttl = nil)
+    storage.set k, v, ttl
   end
   
   # Delete a value.
   #
   # Example:
-  #     Cache.delete 'hello'
-  def self.delete(k)
-    Storage.instance.delete k
+  #     cache.delete 'hello'
+  def delete(k)
+    storage.delete k
   end
   
   # Flush the cache.
   #
   # Example:
-  #     Cache.flush
-  def self.flush
-    Storage.instance.flush
+  #     cache.flush
+  def flush
+    storage.flush
   end
 end

@@ -4,12 +4,38 @@ A unified cache handling interface, inspired (but simpler than) Perl's Cache::Ca
 
 Takes care of exceptions like Memcached::NotFound and also forking/threading.
 
+== Example
+
+    require 'memcached' # a really fast memcached client gem
+    require 'client'    # this gem, which provides a standard interface
+    raw_client = Memcached.new '127.0.0.1:11211'
+    cache = Cache.new raw_client
+
+or
+
+    require 'redis'     # the redis key-value store
+    require 'client'    # this gem, which provides a standard interface
+    raw_client = Redis.new
+    cache = Cache.new raw_client
+
+or
+
+    require 'dalli'     # the dalli memcached client used by heroku
+    require 'client'    # this gem, which provides a standard interface
+    raw_client = Dalli::Client.new
+    cache = Cache.new raw_client
+
+Maybe this will even work:
+
+    # Piggyback off the default rails cache
+    cache = Cache.new Rails.cache
+
 == Methods
 
-* get
-* set
-* delete
-* flush
+    cache.get 'hello'
+    cache.set 'hello', 'world'
+    cache.delete 'hello'
+    cache.flush
 
 == Supported clients
 
@@ -23,35 +49,24 @@ Supported Redis clients:
 
 * redis[https://github.com/ezmobius/redis-rb]
 
-== Configuration
-
-You set your preferred cache client:
-
-    Cache.config.client = Memcached.new '127.0.0.1:11211'
-
-or
-
-    Cache.config.client = Redis.new
-
-or this might even work...
-
-    Cache.config.client = Rails.cache
-
 == TTL
 
 0 means don't expire.
 
 == Forking/threading
 
-As long as you set <tt>Cache.config.client=</tt> and use <tt>Cache.set</tt>, <tt>Cache.get</tt>, etc., you don't have to worry about forking/threading.
+When you use a Cache object to wrap Memcached or Redis, you don't have to worry about forking or threading.
 
 For example, you don't have to set up unicorn or PhusionPassenger's <tt>after_fork</tt>.
 
 == Rationale
 
+I wanted a common interface to a bunch of great Ruby cache clients so I can develop gems (lock_method, cache_method) that accept any of them.
+
 * I am so tired of rescuing from Memcached::NotFound
 * I am so tired of forgetting whether it's :expires_in or :ttl
 * I don't know why we ever started using read/write instead of get/set.
+* I don't like how you have to manually handle after_fork for Redis, Memcached, etc.
 
 == Currently unsupported
 

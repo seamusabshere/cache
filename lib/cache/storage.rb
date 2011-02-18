@@ -1,8 +1,14 @@
-require 'singleton'
-module Cache
+class Cache
   class Storage #:nodoc: all
-    include ::Singleton
-        
+
+    attr_reader :parent
+
+    def initialize(parent)
+      @parent = parent
+      @pid = ::Process.pid
+      @thread_object_id = ::Thread.current.object_id
+    end
+    
     def get(k)
       if defined?(::Memcached) and bare_client.is_a?(::Memcached)
         begin; bare_client.get(k); rescue ::Memcached::NotFound; nil; end
@@ -20,7 +26,7 @@ module Cache
     end
         
     def set(k, v, ttl)
-      ttl ||= Config.instance.default_ttl
+      ttl ||= parent.config.default_ttl
       if defined?(::Redis) and bare_client.is_a?(::Redis)
         if ttl == 0
           bare_client.set k, ::Marshal.dump(v)
@@ -56,35 +62,37 @@ module Cache
       bare_client.send %w{ flush flushdb flush_all clear }.detect { |flush_cmd| bare_client.respond_to? flush_cmd }
     end
     
-    def bare_client
-      if @pid == ::Process.pid
-        fork_detected = false
-      else
-        fork_detected = true
-        ::Thread.current[:cache_storage_bare_client] = nil
+    private
+    
+    def fork_detected?
+      if @pid != ::Process.pid
         @pid = ::Process.pid
       end
-      ::Thread.current[:cache_storage_bare_client] ||= fresh_bare_client(fork_detected)
     end
     
-    def fresh_bare_client(fork_detected)
-      if defined?(::Dalli) and Config.instance.client.is_a?(::Dalli::Client)
-        Config.instance.client.close if fork_detected
-        Config.instance.client
-      elsif defined?(::ActiveSupport::Cache::DalliStore) and Config.instance.client.is_a?(::ActiveSupport::Cache::DalliStore)
-        Config.instance.client.reset if fork_detected
-        Config.instance.client
-      elsif defined?(::Memcached) and (Config.instance.client.is_a?(::Memcached) or Config.instance.client.is_a?(::Memcached::Rails))
-        Config.instance.client.clone
-      elsif defined?(::Redis) and Config.instance.client.is_a?(::Redis)
-        Config.instance.client.client.connect if fork_detected
-        Config.instance.client
-      elsif defined?(::MemCache) and Config.instance.client.is_a?(::MemCache)
-        Config.instance.client.reset if fork_detected
-        Config.instance.client
-      else
-        raise "Don't know how to thread/fork #{Config.instance.client.inspect}"
+    def new_thread_detected?
+      if @thread_object_id != ::Thread.current.object_id
+        @thread_object_id = ::Thread.current.object_id
       end
+    end
+    
+    def bare_client
+      fork_detected = fork_detected?
+      new_thread_detected = new_thread_detected?
+      if defined?(::Dalli) and parent.config.client.is_a?(::Dalli::Client)
+        parent.config.client.close if fork_detected
+      elsif defined?(::ActiveSupport::Cache::DalliStore) and parent.config.client.is_a?(::ActiveSupport::Cache::DalliStore)
+        parent.config.client.reset if fork_detected
+      elsif defined?(::Memcached) and (parent.config.client.is_a?(::Memcached) or parent.config.client.is_a?(::Memcached::Rails))
+        parent.config.client = parent.config.client.clone if fork_detected or new_thread_detected
+      elsif defined?(::Redis) and parent.config.client.is_a?(::Redis)
+        parent.config.client.client.connect if fork_detected
+      elsif defined?(::MemCache) and parent.config.client.is_a?(::MemCache)
+        parent.config.client.reset if fork_detected
+      else
+        raise "Don't know how to thread/fork #{parent.config.client.inspect}"
+      end
+      parent.config.client
     end
   end
 end

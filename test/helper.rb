@@ -10,4 +10,8 @@ require 'cache'
 require 'shared_tests'
 
 class Test::Unit::TestCase
+  def setup
+    @cache = Cache.new @client
+    @cache.flush
+  end
 end

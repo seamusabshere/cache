@@ -1,39 +1,34 @@
-require 'singleton'
-module Cache
-  # Here's where you set config options.
+class Cache
+  # Here's where config options are kept.
   #
   # Example:
-  #     Cache.config.client = Memcached.new '127.0.0.1:11211'
-  #     Cache.config.default_ttl = 120 # seconds
-  #
-  # You'd probably put this in your Rails config/initializers, for example.
+  #     cache.config.default_ttl = 120 # seconds
   class Config
-    include ::Singleton
+    
+    attr_reader :parent
+    
+    def initialize(parent) #:nodoc:
+      @parent = parent
+    end
     
     # The cache client to use.
     #
-    # Supported memcached clients:
-    # * memcached[https://github.com/fauna/memcached] (either a Memcached or a Memcached::Rails)
-    # * dalli[https://github.com/mperham/dalli] (either a Dalli::Client or an ActiveSupport::Cache::DalliStore)
-    # * memcache-client[https://github.com/mperham/memcache-client] (MemCache, the one commonly used by Rails)
-    #
-    # Supported Redis clients:
-    # * redis[https://github.com/ezmobius/redis-rb]
+    # Note that you normally just set this when you initialize a Cache object.
     #
     # Example:
-    #     Cache.config.storage = Memcached.new '127.0.0.1:11211'
-    def client=(client)
+    #     cache.config.client = Memcached.new '127.0.0.1:11211'
+    def client=(client) #:nodoc:
       @client = client
     end
 
     def client #:nodoc:
-      @client 
+      @client || raise("You didn't select a cache client")
     end
     
     # TTL for method caches. Defaults to 60 seconds.
     #
     # Example:
-    #     Cache.config.default_ttl = 120 # seconds
+    #     cache.config.default_ttl = 120 # seconds
     def default_ttl=(seconds)
       @default_ttl = seconds
     end
