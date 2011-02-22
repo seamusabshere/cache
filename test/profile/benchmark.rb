@@ -3,7 +3,7 @@ HERE = File.dirname(__FILE__)
 $LOAD_PATH << "#{HERE}/../../lib/"
 UNIX_SOCKET_NAME = File.join(ENV['TMPDIR']||'/tmp','memcached') 
 
-require 'memcached'
+require 'cache'
 require 'benchmark'
 require 'rubygems'
 require 'ruby-debug' if ENV['DEBUG']
@@ -25,6 +25,8 @@ puts "Ruby #{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   gem gem_name
   puts "Loaded #{gem_name} #{Gem.loaded_specs[gem_name].version.to_s rescue nil}"
 end
+
+MEMCACHED_HERE = File.expand_path(File.join(File.dirname(Gem.required_location('memcached', 'memcached.rb')), '..', 'test', 'profile'))
 
 class Remix::Stash
   # Remix::Stash API doesn't let you set servers
@@ -100,7 +102,7 @@ class Bench
   private
   
   def reset_servers
-    system("ruby #{HERE}/../setup.rb")
+    system("ruby #{MEMCACHED_HERE}/../setup.rb")
     sleep(1)
   end
   
