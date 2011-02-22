@@ -5,9 +5,8 @@ require 'active_support/all'
 require 'active_support/cache/dalli_store'
 
 class TestDalliStoreStorage < Test::Unit::TestCase
-  def setup
-    @client = ActiveSupport::Cache::DalliStore.new ['localhost:11211']
-    super
+  def raw_client
+    ActiveSupport::Cache::DalliStore.new ['localhost:11211']
   end
     
   include SharedTests

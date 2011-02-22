@@ -4,9 +4,8 @@ require 'helper'
 require 'memcache'
 
 class TestMemcacheStorage < Test::Unit::TestCase
-  def setup
-    @client = MemCache.new ['localhost:11211']
-    super
+  def raw_client
+    MemCache.new ['localhost:11211']
   end
     
   include SharedTests

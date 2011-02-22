@@ -10,59 +10,91 @@ class Cache
     end
     
     def get(k)
-      if defined?(::Memcached) and bare_client.is_a?(::Memcached)
+      reset_if_forked_or_threaded
+      if memcached?
         begin; bare_client.get(k); rescue ::Memcached::NotFound; nil; end
-      elsif defined?(::Redis) and bare_client.is_a?(::Redis)
+      elsif dalli? or memcached_rails? or mem_cache?
+        bare_client.get k
+      elsif redis?
         if cached_v = bare_client.get(k) and cached_v.is_a?(::String)
           ::Marshal.load cached_v
         end
-      elsif bare_client.respond_to?(:get)
-        bare_client.get k
-      elsif bare_client.respond_to?(:read)
+      elsif active_support_store?
         bare_client.read k
       else
-        raise "Don't know how to work with #{bare_client.inspect} because it doesn't define get"
+        raise "Don't know how to GET with #{bare_client.inspect}"
       end
     end
         
     def set(k, v, ttl)
       ttl ||= parent.config.default_ttl
-      if defined?(::Redis) and bare_client.is_a?(::Redis)
+      reset_if_forked_or_threaded
+      if memcached? or dalli? or memcached_rails? or mem_cache?
+        bare_client.set k, v, ttl
+      elsif redis?
         if ttl == 0
           bare_client.set k, ::Marshal.dump(v)
         else
           bare_client.setex k, ttl, ::Marshal.dump(v)
         end
-      elsif bare_client.respond_to?(:set)
-        bare_client.set k, v, ttl
-      elsif bare_client.respond_to?(:write)
+      elsif active_support_store?
         if ttl == 0
           bare_client.write k, v # never expire
         else
           bare_client.write k, v, :expires_in => ttl
         end
       else
-        raise "Don't know how to work with #{bare_client.inspect} because it doesn't define set"
+        raise "Don't know how to SET with #{bare_client.inspect}"
       end
     end
     
     def delete(k)
-      if defined?(::Memcached) and bare_client.is_a?(::Memcached)
+      reset_if_forked_or_threaded
+      if memcached?
         begin; bare_client.delete(k); rescue ::Memcached::NotFound; nil; end
-      elsif defined?(::Redis) and bare_client.is_a?(::Redis)
+      elsif redis?
         bare_client.del k
-      elsif bare_client.respond_to?(:delete)
+      elsif dalli? or memcached_rails? or mem_cache? or active_support_store?
         bare_client.delete k
       else
-        raise "Don't know how to work with #{bare_client.inspect} because it doesn't define delete"
+        raise "Don't know how to DELETE with #{bare_client.inspect}"
       end
     end
     
     def flush
+      reset_if_forked_or_threaded
       bare_client.send %w{ flush flushdb flush_all clear }.detect { |flush_cmd| bare_client.respond_to? flush_cmd }
     end
     
     private
+    
+    def bare_client
+      @bare_client ||= parent.config.client
+    end
+    
+    def reset_if_forked_or_threaded
+      if fork_detected?
+        if dalli?
+          parent.config.client.close
+        elsif dalli_store?
+          parent.config.client.reset
+        elsif memcached? or memcached_rails?
+          cloned_client = parent.config.client.clone
+          parent.config.client = cloned_client
+          @bare_client = parent.config.client
+        elsif redis?
+          parent.config.client.client.connect
+        elsif mem_cache?
+          parent.config.client.reset
+        end
+      elsif new_thread_detected?
+        if memcached? or memcached_rails?
+          cloned_client = parent.config.client.clone
+          parent.config.client = cloned_client
+          @bare_client = parent.config.client
+        end
+      end
+    end
     
     def fork_detected?
       if @pid != ::Process.pid
@@ -75,24 +107,54 @@ class Cache
         @thread_object_id = ::Thread.current.object_id
       end
     end
+        
+    def dalli?
+      return @dalli_query[0] if @dalli_query.is_a?(::Array)
+      answer = (defined?(::Dalli) and bare_client.is_a?(::Dalli::Client))
+      @dalli_query = [answer]
+      answer
+    end
     
-    def bare_client
-      fork_detected = fork_detected?
-      new_thread_detected = new_thread_detected?
-      if defined?(::Dalli) and parent.config.client.is_a?(::Dalli::Client)
-        parent.config.client.close if fork_detected
-      elsif defined?(::ActiveSupport::Cache::DalliStore) and parent.config.client.is_a?(::ActiveSupport::Cache::DalliStore)
-        parent.config.client.reset if fork_detected
-      elsif defined?(::Memcached) and (parent.config.client.is_a?(::Memcached) or parent.config.client.is_a?(::Memcached::Rails))
-        parent.config.client = parent.config.client.clone if fork_detected or new_thread_detected
-      elsif defined?(::Redis) and parent.config.client.is_a?(::Redis)
-        parent.config.client.client.connect if fork_detected
-      elsif defined?(::MemCache) and parent.config.client.is_a?(::MemCache)
-        parent.config.client.reset if fork_detected
-      else
-        raise "Don't know how to thread/fork #{parent.config.client.inspect}"
-      end
-      parent.config.client
+    def active_support_store?
+      return @active_support_store_query[0] if @active_support_store_query.is_a?(::Array)
+      answer = (defined?(::ActiveSupport::Cache) and bare_client.is_a?(::ActiveSupport::Cache::Store))
+      @active_support_store_query = [answer]
+      answer
+    end
+    
+    def dalli_store?
+      return @dalli_store_query[0] if @dalli_store_query.is_a?(::Array)
+      answer = (defined?(::ActiveSupport::Cache::DalliStore) and bare_client.is_a?(::ActiveSupport::Cache::DalliStore))
+      @dalli_store_query = [answer]
+      answer
+    end
+    
+    def mem_cache?
+      return @mem_cache_query[0] if @mem_cache_query.is_a?(::Array)
+      answer = (defined?(::MemCache) and bare_client.is_a?(::MemCache))
+      @mem_cache_query = [answer]
+      answer
+    end
+
+    def memcached?
+      return @memcached_query[0] if @memcached_query.is_a?(::Array)
+      answer = (defined?(::Memcached) and bare_client.is_a?(::Memcached))
+      @memcached_query = [answer]
+      answer
+    end
+    
+    def memcached_rails?
+      return @memcached_rails_query[0] if @memcached_rails_query.is_a?(::Array)
+      answer = (defined?(::Memcached) and bare_client.is_a?(::Memcached::Rails))
+      @memcached_rails_query = [answer]
+      answer
+    end
+    
+    def redis?
+      return @redis_query[0] if @redis_query.is_a?(::Array)
+      answer = (defined?(::Redis) and bare_client.is_a?(::Redis))
+      @redis_query = [answer]
+      answer
     end
   end
 end

@@ -5,10 +5,9 @@ if ENV['REDIS_URL']
   require 'uri'
 
   class TestRedisStorage < Test::Unit::TestCase
-    def setup
+    def raw_client
       uri = URI.parse(ENV["REDIS_URL"])
-      @client = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
-      super
+      Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
     end
     
     include SharedTests

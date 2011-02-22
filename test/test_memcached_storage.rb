@@ -3,9 +3,8 @@ require 'helper'
 require 'memcached'
 
 class TestMemcachedStorage < Test::Unit::TestCase
-  def setup
-    @client = Memcached.new 'localhost:11211'
-    super
+  def raw_client
+    Memcached.new 'localhost:11211'
   end
     
   include SharedTests

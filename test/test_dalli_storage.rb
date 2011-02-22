@@ -3,9 +3,8 @@ require 'helper'
 require 'dalli'
 
 class TestDalliStorage < Test::Unit::TestCase
-  def setup
-    @client = Dalli::Client.new ['localhost:11211']
-    super
+  def raw_client
+    Dalli::Client.new ['localhost:11211']
   end
     
   include SharedTests
