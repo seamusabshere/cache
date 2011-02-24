@@ -5,6 +5,8 @@ class Cache
 
   # Create a new Cache object by passing it a client of your choice.
   #
+  # Defaults to an in-process memory store, but you probably don't want that.
+  #
   # Supported memcached clients:
   # * memcached[https://github.com/fauna/memcached] (either a Memcached or a Memcached::Rails)
   # * dalli[https://github.com/mperham/dalli] (either a Dalli::Client or an ActiveSupport::Cache::DalliStore)
