@@ -22,7 +22,13 @@ class Cache
     end
 
     def client #:nodoc:
-      @client || raise("You didn't select a cache client")
+      if @client.nil?
+        require 'active_support/cache'
+        require 'active_support/cache/memory_store'
+        @client = ::ActiveSupport::Cache::MemoryStore.new
+      else
+        @client
+      end
     end
     
     # TTL for method caches. Defaults to 60 seconds.

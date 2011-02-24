@@ -3,9 +3,9 @@ require 'helper'
 require 'active_support/cache'
 require 'active_support/cache/memory_store'
 
-class TestMemoryStoreStorage < Test::Unit::TestCase
+class TestDefaultStorage < Test::Unit::TestCase
   def raw_client
-    ::ActiveSupport::Cache::MemoryStore.new
+    nil
   end
   
   def test_query

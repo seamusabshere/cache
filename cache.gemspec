@@ -19,11 +19,11 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   
+  s.add_dependency 'activesupport', '>=2.3.11' # for default memory store
+  s.add_dependency 'i18n' # activesupport
   s.add_development_dependency 'test-unit'
   s.add_development_dependency 'redis'
   s.add_development_dependency 'dalli'
-  s.add_development_dependency 'activesupport', '>=2.3.4' # for DalliStore
-  s.add_development_dependency 'i18n' # activesupport
   s.add_development_dependency 'memcached'
   s.add_development_dependency 'memcache-client'
 end
