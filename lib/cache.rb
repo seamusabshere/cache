@@ -16,7 +16,7 @@ class Cache
   # Example:
   #     raw_client = Memcached.new('127.0.0.1:11211')
   #     cache = Cache.new raw_client
-  def initialize(client)
+  def initialize(client = nil)
     config.client = client
   end
 
