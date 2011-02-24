@@ -14,3 +14,5 @@ class Test::Unit::TestCase
     @cache.flush
   end
 end
+
+ENV['CACHE_DEBUG'] = 'true'

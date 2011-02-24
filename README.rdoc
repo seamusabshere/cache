@@ -6,22 +6,30 @@ Takes care of exceptions like Memcached::NotFound and also forking/threading.
 
 == Example
 
+It uses a (useless?) memory store by default:
+
+    cache = Cache.new
+    cache.set 'hello'
+    cache.get 'hello', 'world'
+
+You can specify a more useful cache client:
+
     require 'memcached' # a really fast memcached client gem
-    require 'client'    # this gem, which provides a standard interface
+    require 'cache'    # this gem, which provides a standard interface
     raw_client = Memcached.new '127.0.0.1:11211'
     cache = Cache.new raw_client
 
 or
 
     require 'redis'     # the redis key-value store
-    require 'client'    # this gem, which provides a standard interface
+    require 'cache'    # this gem, which provides a standard interface
     raw_client = Redis.new
     cache = Cache.new raw_client
 
 or
 
     require 'dalli'     # the dalli memcached client used by heroku
-    require 'client'    # this gem, which provides a standard interface
+    require 'cache'    # this gem, which provides a standard interface
     raw_client = Dalli::Client.new
     cache = Cache.new raw_client
 

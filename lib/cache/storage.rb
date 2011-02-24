@@ -74,6 +74,7 @@ class Cache
     
     def reset_if_forked_or_threaded
       if fork_detected?
+        $stderr.puts "fork detected" if ENV['CACHE_DEBUG'] == 'true'
         if dalli?
           parent.config.client.close
         elsif dalli_store?
@@ -88,6 +89,7 @@ class Cache
           parent.config.client.reset
         end
       elsif new_thread_detected?
+        $stderr.puts "new thread detected" if ENV['CACHE_DEBUG'] == 'true'
         if memcached? or memcached_rails?
           cloned_client = parent.config.client.clone
           parent.config.client = cloned_client
@@ -126,6 +128,13 @@ class Cache
       return @dalli_store_query[0] if @dalli_store_query.is_a?(::Array)
       answer = (defined?(::ActiveSupport::Cache::DalliStore) and bare_client.is_a?(::ActiveSupport::Cache::DalliStore))
       @dalli_store_query = [answer]
+      answer
+    end
+    
+    def memory_store?
+      return @memory_store_query[0] if @memory_store_query.is_a?(::Array)
+      answer = (defined?(::ActiveSupport::Cache::MemoryStore) and bare_client.is_a?(::ActiveSupport::Cache::MemoryStore))
+      @memory_store_query = [answer]
       answer
     end
     
