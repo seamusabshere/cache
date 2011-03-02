@@ -28,6 +28,7 @@ class Cache
         
     def set(k, v, ttl)
       ttl ||= parent.config.default_ttl
+      ttl = ttl.to_i
       reset_if_forked_or_threaded
       if memcached? or dalli? or memcached_rails? or mem_cache?
         bare_client.set k, v, ttl
