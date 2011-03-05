@@ -4,3 +4,4 @@ Gemfile.lock
 pkg/*
 secret.sh
 rdoc/*
+.yardoc

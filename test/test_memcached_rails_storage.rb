@@ -4,13 +4,13 @@ require 'memcached'
 
 class TestMemcachedRailsStorage < Test::Unit::TestCase
   def raw_client
-    Memcached::Rails.new 'localhost:11211'
+    Memcached::Rails.new 'localhost:11211', :support_cas => true
   end
     
   include SharedTests
   
-  def get_bare_client_id
-    @cache.storage.send(:bare_client).object_id
+  def get_bare_id
+    @cache.storage.send(:bare).object_id
   end
   
   def test_treats_as_not_thread_safe
@@ -18,17 +18,17 @@ class TestMemcachedRailsStorage < Test::Unit::TestCase
     @cache.get 'hi'
     
     # get the main thread's bare client
-    main_thread_bare_client_id = get_bare_client_id
+    main_thread_bare_id = get_bare_id
     
     # sanity check that it's not changing every time
     @cache.get 'hi'
-    assert_equal main_thread_bare_client_id, get_bare_client_id
+    assert_equal main_thread_bare_id, get_bare_id
     
     # create a new thread and get its bare client
-    new_thread_bare_client_id = Thread.new { @cache.get 'hi'; get_bare_client_id }.value
+    new_thread_bare_id = Thread.new { @cache.get 'hi'; get_bare_id }.value
     
     # make sure the bare client was reinitialized
-    assert(main_thread_bare_client_id != new_thread_bare_client_id)
+    assert(main_thread_bare_id != new_thread_bare_id)
   end
   
   def test_treats_as_not_fork_safe
@@ -36,16 +36,16 @@ class TestMemcachedRailsStorage < Test::Unit::TestCase
     @cache.get 'hi'
     
     # get the main process's bare client
-    parent_process_bare_client_id = get_bare_client_id
+    parent_process_bare_id = get_bare_id
     
     # sanity check that it's not changing every time
     @cache.get 'hi'
-    assert_equal parent_process_bare_client_id, get_bare_client_id
+    assert_equal parent_process_bare_id, get_bare_id
     
     # fork a new process
     pid = Kernel.fork do
       @cache.get 'hi'
-      raise "Didn't split!" if parent_process_bare_client_id == get_bare_client_id
+      raise "Didn't split!" if parent_process_bare_id == get_bare_id
     end
     Process.wait pid
     

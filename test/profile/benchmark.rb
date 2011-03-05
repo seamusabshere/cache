@@ -53,14 +53,14 @@ class Dalli::ClientCompat < Dalli::Client
   end  
 end
 
-class Cache::Compat < Cache
-  def set(*args)
-    super(*args[0..2])
-  end
-  def get(*args)
-    super(args.first)
-  end
-end
+# class Cache::Compat < Cache
+#   def set(*args)
+#     super(*args[0..2])
+#   end
+#   def get(*args)
+#     super(args.first)
+#   end
+# end
 
 class Bench
 
@@ -108,8 +108,8 @@ class Bench
   
   def reset_clients
     @clients = {
-       "cache:libm:bin" => Cache::Compat.new(Memcached.new(['127.0.0.1:43042', '127.0.0.1:43043'], :buffer_requests => false, :no_block => false, :namespace => "namespace", :binary_protocol => true)),
-       "cache:dalli:bin" => Cache::Compat.new(Dalli::Client.new(['127.0.0.1:43042', '127.0.0.1:43043'], :marshal => false, :threadsafe => false)),
+       "cache:libm:bin" => Cache.wrap(Memcached.new(['127.0.0.1:43042', '127.0.0.1:43043'], :buffer_requests => false, :no_block => false, :namespace => "namespace", :binary_protocol => true)),
+       "cache:dalli:bin" => Cache.wrap(Dalli::Client.new(['127.0.0.1:43042', '127.0.0.1:43043'], :marshal => false, :threadsafe => false)),
        "libm:ascii" => Memcached::Rails.new(
          ['127.0.0.1:43042', '127.0.0.1:43043'],
          :buffer_requests => false, :no_block => false, :namespace => "namespace"),
