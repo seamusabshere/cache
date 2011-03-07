@@ -19,7 +19,11 @@ class Cache
   #     raw_client = Memcached.new('127.0.0.1:11211')
   #     cache = Cache.wrap raw_client
   def self.wrap(client = nil)
-    new client
+    if client.is_a?(::Cache)
+      client
+    else
+      new client
+    end
   end
   
   def initialize(client = nil) #:nodoc:
@@ -48,7 +52,7 @@ class Cache
   #     cache.set 'hello', 'world'
   #     cache.set 'hello', 'world', 80 # seconds til it expires
   def set(k, v, ttl = nil, ignored_options = nil)
-    storage.set k, v, ttl
+    storage.set k, v, extract_ttl(ttl)
   end
   
   # Delete a value.
@@ -100,10 +104,12 @@ class Cache
 
   # Try to get a value and if it doesn't exist, set it to the result of the block.
   #
+  # Accepts :expires_in for compatibility with Rails.
+  #
   # Example:
   #     cache.fetch 'hello' { 'world' }
-  def fetch(k, options_ignored_except_expires_in = {}, &blk)
-    storage.fetch k, options_ignored_except_expires_in[:expires_in], &blk
+  def fetch(k, ttl = nil, &blk)
+    storage.fetch k, extract_ttl(ttl), &blk
   end
   
   # Get the current value (if any), pass it into a block, and set the result.
@@ -111,7 +117,7 @@ class Cache
   # Example:
   #     cache.cas 'hello' { |current| 'world' }
   def cas(k, ttl = nil, &blk)
-    storage.cas k, ttl, &blk
+    storage.cas k, extract_ttl(ttl), &blk
   end
   
   alias :compare_and_swap :cas
@@ -123,16 +129,39 @@ class Cache
   def stats
     storage.stats
   end
+
+  # Get multiple cache entries.
+  #
+  # Example:
+  #     cache.get_multi 'hello', 'privyet'
+  def get_multi(*ks)
+    storage.get_multi ks
+  end
   
-  def write(k, v, options_ignored_except_expires_in = {}) #:nodoc:
-    storage.set k, v, options_ignored_except_expires_in[:expires_in]
+  # Like get, but accepts :expires_in for compatibility with Rails.
+  #
+  # In general, you should use get instead.
+  #
+  # Example:
+  #     cache.write 'hello', 'world', :expires_in => 5.minutes
+  def write(k, v, ttl = nil)
+    storage.set k, v, extract_ttl(ttl)
   end
   
   def read(k, ignored_options = nil) #:nodoc:
     storage.get k
   end
   
-  def read_multi(*ks) #:nodoc:
-    ks.map { |k| storage.get k }
+  private
+  
+  def extract_ttl(ttl)
+    case ttl
+    when ::Hash
+      ttl[:expires_in]
+    when ::NilClass
+      config.default_ttl
+    else
+      ttl.to_i
+    end
   end
 end

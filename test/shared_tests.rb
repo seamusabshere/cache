@@ -70,6 +70,10 @@ module SharedTests
     assert_equal 'world', @cache.fetch('hello') { 'world' }
   end
   
+  def test_fetch_with_expires_in
+    assert_equal 'world', @cache.fetch('hello', :expires_in => 5) { 'world' }
+  end
+  
   def test_cas
     toggle = lambda do |current|
       current == 'on' ? 'off' : 'on'
@@ -118,13 +122,9 @@ module SharedTests
     assert_equal -2, @cache.get('high-fives')
   end
   
-  def test_read_multi
+  def test_get_multi
     @cache.set 'hello', 'world'
     @cache.set 'privyet', 'mir'
-    assert_equal %w{world mir}, @cache.read_multi('hello', 'privyet')
+    assert_equal({ 'hello' => 'world', 'privyet' => 'mir'}, @cache.get_multi('hello', 'privyet', 'yoyoyo'))
   end
-  
-  alias :test_clear :test_flush
-  
-  alias :test_compare_and_swap :test_cas
 end

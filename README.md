@@ -2,7 +2,52 @@
 
 A unified cache handling interface, inspired by libraries like [ActiveSupport::Cache::Store](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html), Perl's [Cache::Cache](http://cpan.uwinnipeg.ca/module/Cache::Cache), and [CHI](http://cpan.uwinnipeg.ca/module/CHI).
 
-## Supported methods
+## Quick example
+
+    require 'memcached' # a really fast memcached client gem
+    require 'cache'     # this gem, which wraps the client to provide a standard interface
+    raw_client = Memcached.new('127.0.0.1:11211')
+    @cache = Cache.wrap(raw_client)
+    
+    # don't worry, even though it's memcached gem, this won't raise Memcached::NotFound
+    @cache.get('hello')
+    
+    # fetch is not provided by the memcached gem, the wrapper adds it
+    @cache.fetch('hello') { 'world' }
+    
+    # don't worry, the wrapper will automatically clone the Memcached object after forking
+    Kernel.fork { @cache.get('hello') }
+
+## Rationale
+
+I wanted a common interface to a bunch of great Ruby cache clients so I can develop gems (lock_method, cache_method) that accept any of them.
+
+* I'm tired of rescuing from Memcached::NotFound
+* I'm tired of forgetting whether it's :expires_in or :ttl
+* I don't know why we ever started using read/write instead of get/set.
+* I don't like how you have to manually handle after_fork for Redis, Memcached, etc.
+* I don't know why Memcached::Rails isn't implemented as an ActiveRecord::Cache::Store (Dalli did it just fine!)
+* Why are you asking me about :raw or whatever? Just marshal it
+
+## Features
+
+### Forking/threading
+
+When you use a Cache object to wrap Memcached or Redis, you don't have to worry about forking or threading.
+
+For example, you don't have to set up unicorn or PhusionPassenger's <tt>after_fork</tt>.
+
+### TTL
+
+0 means don't expire.
+
+The default ttl is 60 seconds.
+
+### Marshalling
+
+Everything gets marshalled. No option to turn it into "raw" mode. If you need that kind of control, please submit a patch or just use one of the other gems directly.
+
+### Supported methods
 
 It will translate these methods to whatever Redis, Memcached, etc. client you're using:
 
@@ -16,6 +61,7 @@ It will translate these methods to whatever Redis, Memcached, etc. client you're
     @cache.cas 'hello' { |current| 'world' }
     @cache.increment 'high-fives'
     @cache.decrement 'high-fives'
+    @cache.get_multi 'hello', 'privyet', 'hallo'
 
 Also provided for Rails compatibility:
 
@@ -25,16 +71,17 @@ Also provided for Rails compatibility:
     @cache.compare_and_swap
     @cache.read_multi 'hello', 'privyet', 'hallo'
 
-## Rationale
+### Supported clients
 
-I wanted a common interface to a bunch of great Ruby cache clients so I can develop gems (lock_method, cache_method) that accept any of them.
+Supported memcached clients:
 
-* I'm tired of rescuing from Memcached::NotFound
-* I'm tired of forgetting whether it's :expires_in or :ttl
-* I don't know why we ever started using read/write instead of get/set.
-* I don't like how you have to manually handle after_fork for Redis, Memcached, etc.
-* I don't know why Memcached::Rails isn't implemented as an ActiveRecord::Cache::Store (Dalli did it just fine!)
-* Why are you asking me about :raw or whatever? Just marshal it
+* [memcached](https://github.com/fauna/memcached) (native C extensions, super fast!)
+* [dalli](https://github.com/mperham/dalli) (pure ruby, recommended if you're on heroku)
+* [memcache-client](https://github.com/mperham/memcache-client) (not recommended. the one that comes with Rails.)
+
+Supported Redis clients:
+
+* [redis](https://github.com/ezmobius/redis-rb)
 
 ## How you might use it
 
@@ -50,18 +97,6 @@ I wanted a common interface to a bunch of great Ruby cache clients so I can deve
     <td><pre>config.cache_store = Cache.wrap(Memcached.new)</pre></td>
     <td><pre>config.cache_store = Cache.wrap(Dalli::Client.new)</pre></td>
     <td><pre>config.cache_store = Cache.wrap(Redis.new)</pre></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/seamusabshere/cache_method">CacheMethod</a> (already uses Cache internally)</td>
-    <td><pre>CacheMethod.config.storage = Memcached.new</pre></td>
-    <td><pre>CacheMethod.config.storage = Dalli::Client.new</pre></td>
-    <td><pre>CacheMethod.config.storage = Redis.new</pre></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/seamusabshere/lock_method">LockMethod</a> (already uses Cache internally)</td>
-    <td><pre>LockMethod.config.storage = Memcached.new</pre></td>
-    <td><pre>LockMethod.config.storage = Dalli::Client.new</pre></td>
-    <td><pre>LockMethod.config.storage = Redis.new</pre></td>
   </tr>
   <tr>
     <td>Your own library</td>
@@ -90,17 +125,19 @@ end
 </pre>
     </td>
   </tr>
+  <tr>
+    <td><a href="https://github.com/seamusabshere/cache_method">CacheMethod</a> (already uses Cache internally)</td>
+    <td><pre>CacheMethod.config.storage = Memcached.new</pre></td>
+    <td><pre>CacheMethod.config.storage = Dalli::Client.new</pre></td>
+    <td><pre>CacheMethod.config.storage = Redis.new</pre></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/seamusabshere/lock_method">LockMethod</a> (already uses Cache internally)</td>
+    <td><pre>LockMethod.config.storage = Memcached.new</pre></td>
+    <td><pre>LockMethod.config.storage = Dalli::Client.new</pre></td>
+    <td><pre>LockMethod.config.storage = Redis.new</pre></td>
+  </tr>
 </table>
-
-## Forking/threading
-
-When you use a Cache object to wrap Memcached or Redis, you don't have to worry about forking or threading.
-
-For example, you don't have to set up unicorn or PhusionPassenger's <tt>after_fork</tt>.
-
-## TTL
-
-0 means don't expire.
 
 ## Other examples
 
@@ -111,13 +148,6 @@ It defaults to an in-process memory store:
     @cache.get 'hello', 'world'
 
 You can specify a more useful cache client:
-
-    require 'memcached' # a really fast memcached client gem
-    require 'cache'     # this gem, which provides a standard interface
-    raw_client = Memcached.new '127.0.0.1:11211'
-    @cache = Cache.wrap(raw_client)
-
-or
 
     require 'redis'     # the redis key-value store
     require 'cache'     # this gem, which provides a standard interface
@@ -131,22 +161,9 @@ or
     raw_client = Dalli::Client.new
     @cache = Cache.wrap(raw_client)
 
-Don't know why you would ever want to do this:
+Or you could piggyback off the default rails cache:
 
-    # Piggyback off the default rails cache
     @cache = Cache.wrap(Rails.cache)
-
-## Supported clients
-
-Supported memcached clients:
-
-* [memcached](https://github.com/fauna/memcached) (super fast!)
-* [dalli](https://github.com/mperham/dalli) (pure ruby, recommended if you're on heroku)
-* [memcache-client](https://github.com/mperham/memcache-client) (not recommended. the one that comes with Rails.)
-
-Supported Redis clients:
-
-* [redis](https://github.com/ezmobius/redis-rb)
 
 ## Copyright
 

@@ -25,10 +25,24 @@ class Cache
         raise "Don't know how to GET with #{bare.inspect}"
       end
     end
+    
+    def get_multi(ks)
+      reset_if_forked_or_threaded
+      if memcached?
+        bare.get ks
+      elsif memcached_rails? or dalli? or mem_cache?
+        bare.get_multi ks
+      elsif active_support_store?
+        bare.read_multi *ks
+      else
+        ks.inject({}) do |memo, k|
+          memo[k] = get k if exist? k
+          memo
+        end
+      end
+    end
         
     def set(k, v, ttl)
-      ttl ||= parent.config.default_ttl
-      ttl = ttl.to_i
       reset_if_forked_or_threaded
       if memcached? or dalli? or memcached_rails? or mem_cache?
         bare.set k, v, ttl
@@ -103,8 +117,6 @@ class Cache
     end
     
     def fetch(k, ttl, &blk)
-      ttl ||= parent.config.default_ttl
-      ttl = ttl.to_i
       reset_if_forked_or_threaded
       if dalli? or mem_cache?
         bare.fetch k, ttl, &blk
@@ -122,8 +134,6 @@ class Cache
     end
     
     def cas(k, ttl, &blk)
-      ttl ||= parent.config.default_ttl
-      ttl = ttl.to_i
       reset_if_forked_or_threaded
       if memcached?
         begin; bare.cas(k, ttl, &blk); rescue ::Memcached::NotFound; nil; end
