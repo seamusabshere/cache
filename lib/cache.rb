@@ -157,11 +157,11 @@ class Cache
   def extract_ttl(ttl)
     case ttl
     when ::Hash
-      ttl[:expires_in]
+      ttl[:expires_in] || ttl['expires_in'] || ttl[:ttl] || ttl['ttl'] || config.default_ttl
     when ::NilClass
       config.default_ttl
     else
-      ttl.to_i
-    end
+      ttl
+    end.to_i
   end
 end

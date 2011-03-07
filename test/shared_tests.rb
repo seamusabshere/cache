@@ -74,6 +74,14 @@ module SharedTests
     assert_equal 'world', @cache.fetch('hello', :expires_in => 5) { 'world' }
   end
   
+  def test_fetch_with_expires_in_stringified
+    assert_equal 'world', @cache.fetch('hello', 'expires_in' => 5) { 'world' }
+  end
+  
+  def test_fetch_with_ignored_options
+    assert_equal 'world', @cache.fetch('hello', :foo => 'bar') { 'world' }
+  end
+  
   def test_cas
     toggle = lambda do |current|
       current == 'on' ? 'off' : 'on'
@@ -100,7 +108,12 @@ module SharedTests
     sleep 2
     assert_equal nil, @cache.get('hello')
   end
-  
+
+  def test_write_with_ignored_options
+    @cache.write 'hello', 'world', :foobar => 'bazboo'
+    assert_equal 'world', @cache.get('hello')
+  end
+
   def test_read
     @cache.set 'hello', 'world'
     assert_equal 'world', @cache.read('hello')
