@@ -1,0 +1,96 @@
+# sabshere 2/22/11 v0.0.3
+
+vidalia:~/github/cache (master) $ ruby test/profile/benchmark.rb 
+Darwin vidalia 9.8.0 Darwin Kernel Version 9.8.0: Wed Jul 15 16:55:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_I386 i386
+ruby 1.8.7 (2010-05-25 patchlevel 266) [i686-darwin9.8.0]
+RUBY_VERSION=ruby-1.8.7-head
+Ruby 1.8.7p266
+Loaded memcached 1.0.6
+Loaded remix-stash 1.1.3
+Loaded memcache-client 1.8.5
+Loaded cache 0.0.3
+Loaded kgio 2.3.2
+Loaded dalli 1.0.2
+Loops is 20000
+Stack depth is 0
+Small value size is: 13 bytes
+Large value size is: 4158 bytes
+No matching processes belonging to you were found
+                                          user     system      total        real
+set: cache:dalli:bin                  6.020000   1.890000   7.910000 ( 10.568499)
+set: cache:libm:bin                   1.460000   1.280000   2.740000 (  6.112829)
+set: dalli:bin                        5.640000   1.870000   7.510000 ( 10.215219)
+set: libm:ascii                       0.820000   1.320000   2.140000 (  5.446435)
+set: libm:ascii:pipeline              0.360000   0.010000   0.370000 (  0.378485)
+set: libm:ascii:udp                   0.700000   0.720000   1.420000 (  3.659001)
+set: libm:bin                         0.720000   1.340000   2.060000 (  5.364179)
+set: libm:bin:buffer                  0.300000   0.120000   0.420000 (  1.105467)
+set: mclient:ascii                   10.860000   3.820000  14.680000 ( 15.175516)
+set: stash:bin                        3.700000   1.350000   5.050000 (  8.229477)
+
+get: cache:dalli:bin                  6.130000   2.070000   8.200000 ( 10.683650)
+get: cache:libm:bin                   1.440000   1.230000   2.670000 (  5.908044)
+get: dalli:bin                        5.800000   2.080000   7.880000 ( 10.324650)
+get: libm:ascii                       0.970000   1.320000   2.290000 (  5.582769)
+get: libm:ascii:pipeline              1.050000   1.580000   2.630000 (  5.956804)
+get: libm:ascii:udp                   0.820000   0.720000   1.540000 (  3.605324)
+get: libm:bin                         0.820000   1.340000   2.160000 (  5.329828)
+get: libm:bin:buffer                  0.940000   1.630000   2.570000 (  5.748327)
+get: mclient:ascii                   12.900000   3.860000  16.760000 ( 17.249089)
+get: stash:bin                        3.360000   1.320000   4.680000 (  7.949412)
+
+delete: cache:dalli:bin               5.610000   2.100000   7.710000 ( 10.029324)
+delete: cache:libm:bin                2.030000   1.370000   3.400000 (  6.651471)
+delete: dalli:bin                     5.230000   2.110000   7.340000 (  9.676535)
+delete: libm:ascii                    1.790000   1.380000   3.170000 (  6.550488)
+delete: libm:ascii:pipeline           0.570000   0.650000   1.220000 (  1.346079)
+delete: libm:ascii:udp                1.650000   0.870000   2.520000 (  4.527372)
+delete: libm:bin                      1.730000   1.390000   3.120000 (  6.469119)
+delete: libm:bin:buffer               0.480000   0.550000   1.030000 (  1.773955)
+delete: mclient:ascii                10.890000   3.930000  14.820000 ( 15.286474)
+delete:stash:bin => #<NoMethodError: undefined method `delete' for #<Remix::Stash:0x11cc360>>
+
+get-missing: cache:dalli:bin          5.970000   2.260000   8.230000 ( 10.874274)
+get-missing: cache:libm:bin           2.470000   1.580000   4.050000 (  7.471236)
+get-missing: dalli:bin                5.550000   2.230000   7.780000 ( 10.420783)
+get-missing: libm:ascii               2.080000   1.560000   3.640000 (  7.186221)
+get-missing: libm:ascii:pipeline      2.160000   1.890000   4.050000 (  7.482394)
+get-missing: libm:ascii:udp           1.850000   0.930000   2.780000 (  4.956340)
+get-missing: libm:bin                 2.030000   1.470000   3.500000 (  7.022853)
+get-missing: libm:bin:buffer          2.090000   1.890000   3.980000 (  7.314636)
+get-missing: mclient:ascii           11.500000   4.010000  15.510000 ( 16.029498)
+get-missing: stash:bin                3.280000   1.390000   4.670000 (  7.834190)
+
+set-large: cache:dalli:bin            8.070000   2.080000  10.150000 ( 13.126027)
+set-large: cache:libm:bin             2.530000   1.410000   3.940000 (  7.636479)
+set-large: dalli:bin                  7.650000   2.070000   9.720000 ( 12.691443)
+set-large: libm:ascii                 0.930000   1.420000   2.350000 (  6.066637)
+set-large: libm:ascii:pipeline        0.640000   0.450000   1.090000 (  1.279625)
+set-large: libm:ascii:udp             0.820000   0.860000   1.680000 (  4.318411)
+set-large: libm:bin                   0.810000   1.450000   2.260000 (  5.870205)
+set-large: libm:bin:buffer            0.590000   0.660000   1.250000 (  2.492524)
+set-large: mclient:ascii             12.290000   4.120000  16.410000 ( 17.042205)
+set-large: stash:bin                  5.810000   1.430000   7.240000 ( 10.615813)
+
+get-large: cache:dalli:bin            7.680000   2.460000  10.140000 ( 13.286558)
+get-large: cache:libm:bin             6.530000   1.500000   8.030000 ( 11.980532)
+get-large: dalli:bin                  7.240000   2.460000   9.700000 ( 12.743058)
+get-large: libm:ascii                 1.610000   1.540000   3.150000 (  7.086940)
+get-large: libm:ascii:pipeline        1.720000   1.890000   3.610000 (  7.410838)
+get-large: libm:ascii:udp             1.420000   0.960000   2.380000 (  4.688834)
+get-large: libm:bin                   1.440000   1.590000   3.030000 (  6.935013)
+get-large: libm:bin:buffer            1.600000   1.920000   3.520000 (  7.278831)
+get-large: mclient:ascii             15.700000   4.800000  20.500000 ( 21.276235)
+get-large: stash:bin                  3.580000   1.420000   5.000000 (  8.259296)
+
+hash:hsieh                            0.310000   0.000000   0.310000 (  0.314801)
+hash:none                             0.320000   0.000000   0.320000 (  0.317238)
+hash:default                          0.610000   0.000000   0.610000 (  0.627191)
+hash:fnv1_64                          1.270000   0.010000   1.280000 (  1.274384)
+hash:md5                              1.070000   0.000000   1.070000 (  1.080698)
+hash:murmur                           0.560000   0.000000   0.560000 (  0.570058)
+hash:fnv1a_64                         0.690000   0.000000   0.690000 (  0.701543)
+hash:fnv1a_32                         0.680000   0.010000   0.690000 (  0.684682)
+hash:jenkins                          0.660000   0.000000   0.660000 (  0.668542)
+hash:crc                              0.660000   0.000000   0.660000 (  0.665331)
+hash:fnv1_32                          0.630000   0.000000   0.630000 (  0.636520)

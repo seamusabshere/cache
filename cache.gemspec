@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Seamus Abshere"]
   s.email       = ["seamus@abshere.net"]
   s.homepage    = "https://github.com/seamusabshere/cache"
-  s.summary     = %q{Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, including forking}
-  s.description = %q{A unified cache handling interface for Ruby, inspired by (but simpler than) Perl's Cache::Cache}
+  s.summary     = %q{A unified cache handling interface inspired by libraries like ActiveSupport::Cache::Store, Perl's Cache::Cache, CHI, etc.}
+  s.description = %q{Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, including forking}
 
   s.rubyforge_project = "cache"
 
