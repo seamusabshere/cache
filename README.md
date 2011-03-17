@@ -4,6 +4,10 @@ Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, in
 
 A unified cache handling interface, inspired by libraries like [ActiveSupport::Cache::Store](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html), Perl's [Cache::Cache](http://cpan.uwinnipeg.ca/module/Cache::Cache), and [CHI](http://cpan.uwinnipeg.ca/module/CHI).
 
+## Real world usage
+
+In production use at [carbon.brighterplanet.com](http://carbon.brighterplanet.com) and [data.brighterplanet.com](http://data.brighterplanet.com).
+
 ## Quick example
 
     require 'memcached' # a really fast memcached client gem by Evan Weaver, one of the lead engineers at Twitter
@@ -33,10 +37,6 @@ I wanted a common interface to a bunch of great Ruby cache clients so I can deve
 * I don't like how you have to manually handle after_fork for Redis, Memcached, etc.
 * I don't know why Memcached::Rails isn't implemented as an ActiveRecord::Cache::Store (Dalli did it just fine!)
 * Why are you asking me about :raw or whatever? Just marshal it
-
-## Real world usage
-
-In production use at [carbon.brighterplanet.com](http://carbon.brighterplanet.com), the Brighter Planet emission estimate web service.
 
 ## Speed
 
