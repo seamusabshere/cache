@@ -121,17 +121,17 @@ module SharedTests
   
   def test_increment
     assert !@cache.exist?('high-fives')
-    @cache.increment 'high-fives'
+    assert_equal 1, @cache.increment('high-fives')
     assert_equal 1, @cache.get('high-fives')
-    @cache.increment 'high-fives'
+    assert_equal 2, @cache.increment('high-fives')
     assert_equal 2, @cache.get('high-fives')
   end
   
   def test_decrement
     assert !@cache.exist?('high-fives')
-    @cache.decrement 'high-fives'
+    assert_equal -1, @cache.decrement('high-fives')
     assert_equal -1, @cache.get('high-fives')
-    @cache.decrement 'high-fives'
+    assert_equal -2, @cache.decrement('high-fives')
     assert_equal -2, @cache.get('high-fives')
   end
   
