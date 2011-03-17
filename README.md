@@ -2,9 +2,11 @@
 
 Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, including forking.
 
-A unified cache handling interface, inspired by libraries like [ActiveSupport::Cache::Store](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html), Perl's [Cache::Cache](http://cpan.uwinnipeg.ca/module/Cache::Cache), and [CHI](http://cpan.uwinnipeg.ca/module/CHI).
+Aims to let other libraries be cache-agnostic in return for a performance hit.
 
 ## Real world usage
+
+Used by [lock_method](https://github.com/seamusabshere/lock_method) and  [cache_method](https://github.com/seamusabshere/cache_method) so that you can use them with memcached, redis, etc.
 
 In production use at [carbon.brighterplanet.com](http://carbon.brighterplanet.com) and [data.brighterplanet.com](http://data.brighterplanet.com).
 
