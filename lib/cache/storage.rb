@@ -8,7 +8,7 @@ class Cache
       @pid = ::Process.pid
       @thread_object_id = ::Thread.current.object_id
     end
-    
+
     def get(k)
       reset_if_forked_or_threaded
       if memcached?
@@ -25,7 +25,7 @@ class Cache
         raise "Don't know how to GET with #{bare.inspect}"
       end
     end
-    
+
     def get_multi(ks)
       reset_if_forked_or_threaded
       if memcached?
@@ -41,7 +41,7 @@ class Cache
         end
       end
     end
-        
+
     def set(k, v, ttl)
       reset_if_forked_or_threaded
       if memcached? or dalli? or memcached_rails? or mem_cache?
@@ -62,7 +62,7 @@ class Cache
         raise "Don't know how to SET with #{bare.inspect}"
       end
     end
-    
+
     def delete(k)
       reset_if_forked_or_threaded
       if memcached?
@@ -75,12 +75,12 @@ class Cache
         raise "Don't know how to DELETE with #{bare.inspect}"
       end
     end
-    
+
     def flush
       reset_if_forked_or_threaded
       bare.send %w{ flush flushdb flush_all clear }.detect { |flush_cmd| bare.respond_to? flush_cmd }
     end
-    
+
     # TODO detect nils
     def exist?(k)
       reset_if_forked_or_threaded
@@ -96,7 +96,7 @@ class Cache
         !get(k).nil?
       end
     end
-    
+
     # TODO use native memcached increment if available
     # TODO don't reset the timer!
     def increment(k, amount)
@@ -105,17 +105,17 @@ class Cache
       set k, new_v, 0
       new_v
     end
-    
+
     def decrement(k, amount)
       # reset_if_forked_or_threaded - uses increment, which uses get
       increment k, -amount
     end
-    
+
     # TODO don't resort to trickery like this
     def reset
       @pid = nil
     end
-    
+
     def fetch(k, ttl, &blk)
       reset_if_forked_or_threaded
       if dalli? or mem_cache?
@@ -132,7 +132,7 @@ class Cache
         end
       end
     end
-    
+
     def cas(k, ttl, &blk)
       reset_if_forked_or_threaded
       if memcached?
@@ -146,7 +146,7 @@ class Cache
         new_v
       end
     end
-    
+
     def stats
       reset_if_forked_or_threaded
       if bare.respond_to?(:stats)
@@ -155,13 +155,13 @@ class Cache
         {}
       end
     end
-    
+
     private
-    
+
     def bare
       @bare ||= parent.config.client
     end
-    
+
     def reset_if_forked_or_threaded
       if fork_detected?
         # $stderr.puts "fork detected" if ENV['CACHE_DEBUG'] == 'true'
@@ -187,47 +187,47 @@ class Cache
         end
       end
     end
-    
+
     def fork_detected?
       if @pid != ::Process.pid
         @pid = ::Process.pid
       end
     end
-    
+
     def new_thread_detected?
       if @thread_object_id != ::Thread.current.object_id
         @thread_object_id = ::Thread.current.object_id
       end
     end
-        
+
     def dalli?
       return @dalli_query[0] if @dalli_query.is_a?(::Array)
       answer = (defined?(::Dalli) and bare.is_a?(::Dalli::Client))
       @dalli_query = [answer]
       answer
     end
-    
+
     def active_support_store?
       return @active_support_store_query[0] if @active_support_store_query.is_a?(::Array)
       answer = (defined?(::ActiveSupport::Cache) and bare.is_a?(::ActiveSupport::Cache::Store))
       @active_support_store_query = [answer]
       answer
     end
-    
+
     def dalli_store?
       return @dalli_store_query[0] if @dalli_store_query.is_a?(::Array)
       answer = (defined?(::ActiveSupport::Cache::DalliStore) and bare.is_a?(::ActiveSupport::Cache::DalliStore))
       @dalli_store_query = [answer]
       answer
     end
-    
+
     def memory_store?
       return @memory_store_query[0] if @memory_store_query.is_a?(::Array)
       answer = (defined?(::ActiveSupport::Cache::MemoryStore) and bare.is_a?(::ActiveSupport::Cache::MemoryStore))
       @memory_store_query = [answer]
       answer
     end
-    
+
     def mem_cache?
       return @mem_cache_query[0] if @mem_cache_query.is_a?(::Array)
       answer = (defined?(::MemCache) and bare.is_a?(::MemCache))
@@ -241,19 +241,20 @@ class Cache
       @memcached_query = [answer]
       answer
     end
-    
+
     def memcached_rails?
       return @memcached_rails_query[0] if @memcached_rails_query.is_a?(::Array)
       answer = (defined?(::Memcached) and bare.is_a?(::Memcached::Rails))
       @memcached_rails_query = [answer]
       answer
     end
-    
+
     def redis?
       return @redis_query[0] if @redis_query.is_a?(::Array)
-      answer = (defined?(::Redis) and bare.is_a?(::Redis))
+      answer = (defined?(::Redis) and bare.is_a?(::Redis)) || (defined?(::Redis::Namespace) and bare.is_a?(::Redis::Namespace))
       @redis_query = [answer]
       answer
     end
   end
 end
+
