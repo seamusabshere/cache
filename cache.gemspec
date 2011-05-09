@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Seamus Abshere","Christoph Grabo"]
   s.email       = ["seamus@abshere.net","chris@dinarrr.com"]
-  s.homepage    = "https://github.com/asaaki/cache"
+  s.homepage    = "https://github.com/seamusabshere/cache"
   s.summary     = %q{A unified cache handling interface inspired by libraries like ActiveSupport::Cache::Store, Perl's Cache::Cache, CHI, etc.}
   s.description = %q{Wraps memcached, redis(-namespace), memcache-client, dalli and handles their weirdnesses, including forking}
 
