@@ -57,6 +57,13 @@ module SharedTests
     end
   end
 
+  def test_logger
+    assert_equal nil, @cache.logger
+    l = Logger.new $stderr
+    @cache.logger = l
+    assert_equal l, @cache.logger
+  end
+  
   def test_reset
     @cache.set 'hello', 'world'
     assert @cache.exist?('hello')

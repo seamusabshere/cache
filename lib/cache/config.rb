@@ -42,5 +42,13 @@ class Cache
     def default_ttl #:nodoc:
       @default_ttl || 60
     end
+    
+    def logger #:nodoc:
+      @logger
+    end
+    
+    def logger=(logger) #:nodoc:
+      @logger = logger
+    end
   end
 end

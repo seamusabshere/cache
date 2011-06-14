@@ -152,6 +152,14 @@ class Cache
     storage.get k
   end
   
+  def logger #:nodoc:
+    config.logger
+  end
+  
+  def logger=(logger) #:nodoc:
+    config.logger = logger
+  end
+  
   private
   
   def extract_ttl(ttl)
