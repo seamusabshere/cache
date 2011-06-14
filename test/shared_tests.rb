@@ -70,6 +70,11 @@ module SharedTests
     assert_equal 'world', @cache.fetch('hello') { 'world' }
   end
   
+  def test_fetch_with_false_boolean
+    assert_equal nil, @cache.fetch('hello')
+    assert_equal false, @cache.fetch('hello') { false }
+  end
+  
   def test_fetch_with_expires_in
     assert_equal 'world', @cache.fetch('hello', :expires_in => 5) { 'world' }
   end
