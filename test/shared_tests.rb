@@ -1,3 +1,5 @@
+require 'logger'
+
 module SharedTests
   def test_get
     assert_equal nil, @cache.get('hello')
@@ -151,5 +153,13 @@ module SharedTests
     @cache.set 'hello', 'world'
     @cache.set 'privyet', 'mir'
     assert_equal({ 'hello' => 'world', 'privyet' => 'mir'}, @cache.get_multi('hello', 'privyet', 'yoyoyo'))
+  end
+
+  # https://github.com/fauna/memcached/pull/50
+  def test_get_set_behavior
+    @cache.flush
+    @cache.get 'get_set'
+    @cache.set 'get_set', 'go'
+    assert_equal 'go', @cache.get('get_set')
   end
 end
