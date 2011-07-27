@@ -18,14 +18,18 @@ class Cache
     # Example:
     #     cache.config.client = Memcached.new '127.0.0.1:11211'
     def client=(client) #:nodoc:
-      @client = client
+      @client = client.is_a?(::Cache) ? client.config.client : client
     end
 
     def client #:nodoc:
       if @client.nil?
-        require 'active_support/cache'
-        require 'active_support/cache/memory_store'
-        @client = ::ActiveSupport::Cache::MemoryStore.new
+        self.client = if defined?(::Rails) and ::Rails.respond_to?(:cache) and rails_cache = ::Rails.cache and not rails_cache.is_a?(::Cache)
+          rails_cache
+        else
+          require 'active_support/cache'
+          require 'active_support/cache/memory_store'
+          ::ActiveSupport::Cache::MemoryStore.new
+        end
       else
         @client
       end

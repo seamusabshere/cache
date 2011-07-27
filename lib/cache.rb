@@ -19,11 +19,7 @@ class Cache
   #     raw_client = Memcached.new('127.0.0.1:11211')
   #     cache = Cache.wrap raw_client
   def self.wrap(client = nil)
-    if client.is_a?(::Cache)
-      client
-    else
-      new client
-    end
+    new client
   end
   
   def initialize(client = nil) #:nodoc:
