@@ -26,8 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'redis'
   s.add_development_dependency 'redis-namespace'
   s.add_development_dependency 'dalli'
-  # https://github.com/fauna/memcached/pull/50
-  s.add_development_dependency 'memcached', '<=1.2.6'
+  s.add_development_dependency 'memcached'
   s.add_development_dependency 'memcache-client'
   s.add_development_dependency 'rake'
 end

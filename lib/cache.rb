@@ -1,8 +1,7 @@
-require 'cache/version'
-class Cache
-  autoload :Config, 'cache/config'
-  autoload :Storage, 'cache/storage'
+require 'cache/config'
+require 'cache/storage'
 
+class Cache
   # Create a new Cache instance by wrapping a client of your choice.
   #
   # Defaults to an in-process memory store.

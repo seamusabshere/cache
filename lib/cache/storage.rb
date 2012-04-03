@@ -19,7 +19,7 @@ class Cache
         if cached_v = bare.get(k) and cached_v.is_a?(::String)
           ::Marshal.load cached_v
         end
-      elsif active_support_store?
+      elsif active_support_store? or dalli_store?
         bare.read k
       else
         raise "Don't know how to GET with #{bare.inspect}"
@@ -32,7 +32,7 @@ class Cache
         bare.get ks
       elsif memcached_rails? or dalli? or mem_cache?
         bare.get_multi ks
-      elsif active_support_store?
+      elsif active_support_store? or dalli_store?
         bare.read_multi *ks
       else
         ks.inject({}) do |memo, k|
@@ -52,7 +52,7 @@ class Cache
         else
           bare.setex k, ttl, ::Marshal.dump(v)
         end
-      elsif active_support_store?
+      elsif active_support_store? or dalli_store?
         if ttl == 0
           bare.write k, v # never expire
         else
@@ -69,7 +69,7 @@ class Cache
         begin; bare.delete(k); rescue ::Memcached::NotFound; nil; end
       elsif redis?
         bare.del k
-      elsif dalli? or memcached_rails? or mem_cache? or active_support_store?
+      elsif dalli? or memcached_rails? or mem_cache? or active_support_store? or dalli_store?
         bare.delete k
       else
         raise "Don't know how to DELETE with #{bare.inspect}"
