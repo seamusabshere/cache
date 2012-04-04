@@ -15,7 +15,7 @@ puts `env | egrep '^RUBY'`
 puts "Ruby #{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
 
 [ ["memcached", "memcached"], 
-  ["remix-stash", "remix/stash"], 
+  # ["remix-stash", "remix/stash"], 
   # ["astro-remcached", "remcached"], # Clobbers the "Memcached" constant
   ["memcache-client", "memcache"],
   ["cache", "cache"],
@@ -26,12 +26,10 @@ puts "Ruby #{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   puts "Loaded #{gem_name} #{Gem.loaded_specs[gem_name].version.to_s rescue nil}"
 end
 
-MEMCACHED_HERE = File.expand_path(File.join(File.dirname(Gem.required_location('memcached', 'memcached.rb')), '..', 'test', 'profile'))
-
-class Remix::Stash
-  # Remix::Stash API doesn't let you set servers
-  @@clusters = {:default => Remix::Stash::Cluster.new(['127.0.0.1:43042', '127.0.0.1:43043'])}
-end
+# class Remix::Stash
+#   # Remix::Stash API doesn't let you set servers
+#   @@clusters = {:default => Remix::Stash::Cluster.new(['127.0.0.1:43042', '127.0.0.1:43043'])}
+# end
 
 class Dalli::ClientCompat < Dalli::Client
   def set(*args)
@@ -102,8 +100,30 @@ class Bench
   private
   
   def reset_servers
-    system("ruby #{MEMCACHED_HERE}/../setup.rb")
-    sleep(1)
+    # Kill memcached
+    system("killall -9 memcached")
+
+    # Start memcached
+    verbosity = (ENV['DEBUG'] ? "-vv" : "")
+    log = "/tmp/memcached.log"
+    memcached = ENV['MEMCACHED_COMMAND'] || 'memcached'
+    system ">#{log}"
+
+    # TCP memcached
+    (43042..43046).each do |port|
+      cmd = "#{memcached} #{verbosity} -U 0 -p #{port} >> #{log} 2>&1 &"
+      raise "'#{cmd}' failed to start" unless system(cmd)
+    end
+    # UDP memcached
+    (43052..43053).each do |port|
+      cmd = "#{memcached} #{verbosity} -U #{port} -p 0 >> #{log} 2>&1 &"
+      raise "'#{cmd}' failed to start" unless system(cmd)
+    end
+    # Domain socket memcached
+    (0..1).each do |i|
+      cmd = "#{memcached} -M -s #{UNIX_SOCKET_NAME}#{i} #{verbosity} >> #{log} 2>&1 &"
+      raise "'#{cmd}' failed to start" unless system(cmd)
+    end
   end
   
   def reset_clients
@@ -126,7 +146,7 @@ class Bench
          ['127.0.0.1:43042', '127.0.0.1:43043'],
          :no_block => true, :buffer_requests => true, :namespace => "namespace", :binary_protocol => true),
        "mclient:ascii" => MemCache.new(['127.0.0.1:43042', '127.0.0.1:43043']),
-       "stash:bin" => Remix::Stash.new(:root),
+       # "stash:bin" => Remix::Stash.new(:root),
        "dalli:bin" => Dalli::ClientCompat.new(['127.0.0.1:43042', '127.0.0.1:43043'], :marshal => false, :threadsafe => false)}
   end
   

@@ -10,7 +10,7 @@ class TestDalliStorage < Test::Unit::TestCase
   include SharedTests
   
   def get_ring_object_id
-    @cache.config.client.instance_variable_get(:@ring).object_id
+    @cache.instance_variable_get(:@wrapper).instance_variable_get(:@metal).instance_variable_get(:@ring).object_id
   end
   
   def test_treats_as_thread_safe

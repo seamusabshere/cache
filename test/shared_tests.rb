@@ -1,5 +1,3 @@
-require 'logger'
-
 module SharedTests
   def test_get
     assert_equal nil, @cache.get('hello')
@@ -58,22 +56,7 @@ module SharedTests
       @cache.stats
     end
   end
-
-  def test_logger
-    assert_equal nil, @cache.logger
-    l = Logger.new $stderr
-    @cache.logger = l
-    assert_equal l, @cache.logger
-  end
-  
-  def test_reset
-    @cache.set 'hello', 'world'
-    assert @cache.exist?('hello')
-    @cache.reset
-    # still there!
-    assert @cache.exist?('hello')
-  end
-  
+    
   def test_fetch
     assert_equal nil, @cache.fetch('hello')
     assert_equal 'world', @cache.fetch('hello') { 'world' }
