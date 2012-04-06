@@ -1,4 +1,3 @@
-alzabo0:~/code/cache (master) $ ruby test/profile/benchmark.rb 
 Darwin alzabo0 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64
 ruby 1.9.3p125 (2012-02-16 revision 34643) [x86_64-darwin10.8.0]
 RUBYOPT=-ropenssl
@@ -13,7 +12,6 @@ Loops is 20000
 Stack depth is 0
 Small value size is: 19 bytes
 Large value size is: 4189 bytes
-No matching processes belonging to you were found
                                            user     system      total        real
 set: cache:dalli:bin                   2.140000   0.840000   2.980000 (  3.750850)
 set: cache:libm:bin                    0.860000   0.630000   1.490000 (  3.024450)

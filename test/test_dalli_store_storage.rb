@@ -12,7 +12,7 @@ class TestDalliStoreStorage < Test::Unit::TestCase
   include SharedTests
   
   def get_ring_object_id
-    hidden_dalli_client = @cache.instance_variable_get(:@metal).instance_variable_get :@data
+    hidden_dalli_client = @cache.metal.instance_variable_get :@data
     hidden_dalli_client.instance_variable_get(:@ring).object_id
   end
   

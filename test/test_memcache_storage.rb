@@ -11,7 +11,7 @@ class TestMemcacheStorage < Test::Unit::TestCase
   include SharedTests
   
   def get_server_status_ids
-    @cache.instance_variable_get(:@metal).instance_variable_get(:@servers).map { |s| s.status.object_id }
+    @cache.metal.instance_variable_get(:@servers).map { |s| s.status.object_id }
   end
   
   def test_treats_as_thread_safe

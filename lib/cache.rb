@@ -22,12 +22,13 @@ class Cache
   end
   
   attr_reader :config
+  attr_reader :metal
 
   def initialize(metal = nil) #:nodoc:
     @pid = ::Process.pid
     @config = Config.new self
     @metal = if metal.is_a?(Cache)
-      metal.instance_variable_get(:@metal)
+      metal.metal
     elsif metal
       metal
     elsif defined?(::Rails) and ::Rails.respond_to?(:cache) and rails_cache = ::Rails.cache
@@ -108,8 +109,9 @@ class Cache
   # Example:
   #     cache.increment 'high-fives'
   def increment(k, amount = 1, ignored_options = nil)
-    new_v = get(k).to_i + amount
-    set k, new_v, 0
+    handle_fork
+    new_v = _get(k).to_i + amount
+    _set k, new_v, 0
     new_v
   end
 
@@ -128,11 +130,12 @@ class Cache
   # Example:
   #     cache.fetch 'hello' { 'world' }
   def fetch(k, ttl = nil, &blk)
-    if exist? k
-      get k
+    handle_fork
+    if _exist? k
+      _get k
     elsif blk
       v = blk.call
-      set k, v, extract_ttl(ttl)
+      _set k, v, extract_ttl(ttl)
       v
     end
   end
@@ -142,10 +145,11 @@ class Cache
   # Example:
   #     cache.cas 'hello' { |current| 'world' }
   def cas(k, ttl = nil, &blk)
-    if blk and exist?(k)
-      old_v = get k
+    handle_fork
+    if blk and _exist?(k)
+      old_v = _get k
       new_v = blk.call old_v
-      set k, new_v, extract_ttl(ttl)
+      _set k, new_v, extract_ttl(ttl)
       new_v
     end
   end

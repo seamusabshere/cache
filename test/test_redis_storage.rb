@@ -14,7 +14,7 @@ if ENV['REDIS_URL']
     
     # client DOT client
     def get_redis_client_connection_socket_id
-      connection = @cache.instance_variable_get(:@metal).client.instance_variable_get :@connection
+      connection = @cache.metal.client.instance_variable_get :@connection
       sock = connection.instance_variable_get(:@sock)
       # $stderr.puts sock.inspect
       sock.object_id

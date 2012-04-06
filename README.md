@@ -6,7 +6,7 @@ Aims to let other libraries be cache-agnostic in return for a performance hit.
 
 ## Real world usage
 
-Used by [lock_method](https://github.com/seamusabshere/lock_method) and  [cache_method](https://github.com/seamusabshere/cache_method) so that you can use them with memcached, redis, etc.
+Used by [lock_method](https://github.com/seamusabshere/lock_method) and [cache_method](https://github.com/seamusabshere/cache_method) so that you can use them with memcached, redis, etc.
 
 In production use at [carbon.brighterplanet.com](http://carbon.brighterplanet.com) and [data.brighterplanet.com](http://data.brighterplanet.com).
 
@@ -37,37 +37,56 @@ I wanted a common interface to a bunch of great Ruby cache clients so I can deve
 * I'm tired of forgetting whether it's :expires_in or :ttl
 * I don't know why we ever started using read/write instead of get/set.
 * I don't like how you have to manually handle after_fork for Redis, Memcached, etc.
-* I don't know why Memcached::Rails isn't implemented as an ActiveRecord::Cache::Store (Dalli did it just fine!)
+* I don't know why Memcached::Rails doesn't act like a ActiveRecord::Cache::Store
 * Why are you asking me about :raw or whatever? Just marshal it
 
 ## Speed
 
-It's about 50% slower than raw Memcached (if that's what you're wrapping) and barely slower at all than Dalli (if that's what you're wrapping.)
+It's more than 50% slower than raw [Memcached](https://github.com/evan/memcached) and about the same as raw [Dalli](https://github.com/mperham/dalli)
 
-                                          user     system      total        real
-    set: cache:dalli:bin                  5.710000   1.870000   7.580000 ( 10.210710)  <- Cache.wrap(Dalli::Client.new)
-    set: cache:libm:bin                   1.320000   1.260000   2.580000 (  5.913591)  <- Cache.wrap(Memcached.new(:binary_protocol => true))
-    set: dalli:bin                        5.350000   1.860000   7.210000 (  9.860368)  <- Dalli::Client.new
-    set: libm:ascii                       0.760000   1.310000   2.070000 (  5.369027)
-    set: libm:ascii:pipeline              0.280000   0.020000   0.300000 (  0.300872)
-    set: libm:ascii:udp                   0.640000   0.690000   1.330000 (  3.618846)
-    set: libm:bin                         0.640000   1.370000   2.010000 (  5.287203)  <- Memcached.new(:binary_protocol => true)
-    set: libm:bin:buffer                  0.320000   0.170000   0.490000 (  1.238471)
-    set: mclient:ascii                   11.840000   3.820000  15.660000 ( 15.933338)
-    set: stash:bin                        3.420000   1.300000   4.720000 (  7.871299)
+    # raw dalli versus wrapped
 
-    get: cache:dalli:bin                  5.740000   2.050000   7.790000 ( 10.220809)  <- Cache.wrap(Dalli::Client.new)
-    get: cache:libm:bin                   1.330000   1.260000   2.590000 (  5.789277)  <- Cache.wrap(Memcached.new(:binary_protocol => true))
-    get: dalli:bin                        5.430000   2.050000   7.480000 (  9.945485)  <- Dalli::Client.new
-    get: libm:ascii                       0.970000   1.290000   2.260000 (  5.421878)
-    get: libm:ascii:pipeline              1.030000   1.590000   2.620000 (  5.728829)
-    get: libm:ascii:udp                   0.790000   0.730000   1.520000 (  3.393461)
-    get: libm:bin                         0.830000   1.330000   2.160000 (  5.362280)  <- Memcached.new(:binary_protocol => true)
-    get: libm:bin:buffer                  0.900000   1.640000   2.540000 (  5.719478)
-    get: mclient:ascii                   14.010000   3.860000  17.870000 ( 18.125730)
-    get: stash:bin                        3.100000   1.320000   4.420000 (  7.559659)
+    set: cache:dalli:bin                   2.150000   0.840000   2.990000 (  3.752008) <- Cache.wrap(Dalli::Client.new)
+    set: dalli:bin                         2.120000   0.830000   2.950000 (  3.734024) <- Dalli::Client.new
 
-Thanks to https://github.com/fauna/memcached/blob/master/test/profile/benchmark.rb
+    get: cache:dalli:bin                   2.040000   0.910000   2.950000 (  3.646148)
+    get: dalli:bin                         2.040000   0.900000   2.940000 (  3.632840)
+
+    delete: cache:dalli:bin                1.830000   0.880000   2.710000 (  3.381917)
+    delete: dalli:bin                      1.790000   0.880000   2.670000 (  3.327514)
+
+    get-missing: cache:dalli:bin           1.780000   0.880000   2.660000 (  3.344041)
+    get-missing: dalli:bin                 1.760000   0.880000   2.640000 (  3.337539)
+
+    set-large: cache:dalli:bin             2.750000   0.880000   3.630000 (  4.474265)
+    set-large: dalli:bin                   2.720000   0.870000   3.590000 (  4.436163)
+
+    get-large: cache:dalli:bin             2.420000   0.990000   3.410000 (  4.135326)
+    get-large: dalli:bin                   2.410000   0.990000   3.400000 (  4.119832)
+
+    # raw memcached versus wrapped
+
+    set: cache:libm:bin                    0.860000   0.640000   1.500000 (  3.033145) <- Cache.wrap(Memcached.new(:binary_protocol => true))
+    set: libm:bin                          0.200000   0.480000   0.680000 (  1.907099) <- Memcached.new(:binary_protocol => true)
+
+    get: cache:libm:bin                    0.800000   0.680000   1.480000 (  2.700458)
+    get: libm:bin                          0.260000   0.660000   0.920000 (  1.974025)
+
+    delete: cache:libm:bin                 1.000000   0.600000   1.600000 (  2.968057)
+    delete: libm:bin                       0.600000   0.560000   1.160000 (  2.375070)
+
+    get-missing: cache:libm:bin            0.980000   0.800000   1.780000 (  2.850947)
+    get-missing: libm:bin                  0.640000   0.710000   1.350000 (  2.520733)
+
+    set-large: cache:libm:bin              1.220000   0.590000   1.810000 (  3.404739)
+    set-large: libm:bin                    0.230000   0.520000   0.750000 (  2.111738)
+
+    get-large: cache:libm:bin              3.780000   0.870000   4.650000 (  6.073208)
+    get-large: libm:bin                    0.340000   0.830000   1.170000 (  2.304408)
+
+Thanks to https://github.com/evan/memcached/blob/master/test/profile/benchmark.rb
+
+So: hopefully it makes it easier to get started with caching and hit the low-hanging fruit. Then you can move on to a raw client!
 
 ## Features
 
