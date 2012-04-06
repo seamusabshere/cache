@@ -29,6 +29,9 @@ class TestMemcachedStorage < Test::Unit::TestCase
     
     # make sure the bare client was reinitialized
     assert(main_thread_bare_id != new_thread_bare_id)
+
+    # make sure the main thread's client wasn't messed with
+    assert_equal main_thread_bare_id, get_bare_id
   end
   
   def test_treats_as_not_fork_safe
