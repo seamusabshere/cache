@@ -1,6 +1,5 @@
 require 'active_support/core_ext'
 require 'cache/config'
-require 'cache/wrapper'
 
 class Cache
   # Create a new Cache instance by wrapping a client of your choice.
@@ -25,18 +24,22 @@ class Cache
   attr_reader :config
 
   def initialize(metal = nil) #:nodoc:
+    @pid = ::Process.pid
     @config = Config.new self
-    @wrapper = if metal.is_a?(Cache)
-      metal.instance_variable_get(:@wrapper)
+    @metal = if metal.is_a?(Cache)
+      metal.instance_variable_get(:@metal)
     elsif metal
-      Wrapper.wrap metal
+      metal
     elsif defined?(::Rails) and ::Rails.respond_to?(:cache) and rails_cache = ::Rails.cache
-      Wrapper.wrap rails_cache
+      rails_cache
     else
       require 'active_support/cache'
       require 'active_support/cache/memory_store'
-      Wrapper.wrap ::ActiveSupport::Cache::MemoryStore.new
+      ::ActiveSupport::Cache::MemoryStore.new
     end
+    metal_class = @metal.class.name.delete('::') # Memcached::Rails -> 'MemcachedRails'
+    require "cache/#{metal_class.underscore}"
+    extend Cache.const_get(metal_class)
   end
 
   # Get a value.
@@ -44,34 +47,51 @@ class Cache
   # Example:
   #     cache.get 'hello'
   def get(k, ignored_options = nil)
-    @wrapper.get k
+    handle_fork
+    _get k
   end
-  
+
+  alias :read :get
+
+  # Get multiple cache entries.
+  #
+  # Example:
+  #     cache.get_multi 'hello', 'privyet'
+  def get_multi(*ks)
+    handle_fork
+    _get_multi ks
+  end
+
   # Store a value. Note that this will Marshal it.
   #
   # Example:
   #     cache.set 'hello', 'world'
   #     cache.set 'hello', 'world', 80 # seconds til it expires
   def set(k, v, ttl = nil, ignored_options = nil)
-    @wrapper.set k, v, extract_ttl(ttl)
+    handle_fork
+    _set k, v, extract_ttl(ttl)
   end
-  
+
+  alias :write :set
+
   # Delete a value.
   #
   # Example:
   #     cache.delete 'hello'
   def delete(k, ignored_options = nil)
-    @wrapper.delete k
+    handle_fork
+    _delete k
   end
-  
+
   # Flush the cache.
   #
   # Example:
   #     cache.flush
   def flush
-    @wrapper.flush
+    handle_fork
+    _flush
   end
-  
+
   alias :clear :flush
 
   # Check if something exists.
@@ -79,15 +99,18 @@ class Cache
   # Example:
   #     cache.exist? 'hello'
   def exist?(k, ignored_options = nil)
-    @wrapper.exist? k
+    handle_fork
+    _exist? k
   end
-  
+
   # Increment a value.
   #
   # Example:
   #     cache.increment 'high-fives'
   def increment(k, amount = 1, ignored_options = nil)
-    @wrapper.increment k, amount
+    new_v = get(k).to_i + amount
+    set k, new_v, 0
+    new_v
   end
 
   # Decrement a value.
@@ -95,12 +118,7 @@ class Cache
   # Example:
   #     cache.decrement 'high-fives'
   def decrement(k, amount = 1, ignored_options = nil)
-    @wrapper.decrement k, amount
-  end
-  
-  # Reset the cache connection. You shouldn't really use this, because it happens automatically on forking/threading.
-  def reset
-    @wrapper.reset
+    increment k, -amount
   end
 
   # Try to get a value and if it doesn't exist, set it to the result of the block.
@@ -110,51 +128,52 @@ class Cache
   # Example:
   #     cache.fetch 'hello' { 'world' }
   def fetch(k, ttl = nil, &blk)
-    @wrapper.fetch k, extract_ttl(ttl), &blk
+    if exist? k
+      get k
+    elsif blk
+      v = blk.call
+      set k, v, extract_ttl(ttl)
+      v
+    end
   end
-  
+
   # Get the current value (if any), pass it into a block, and set the result.
   #
   # Example:
   #     cache.cas 'hello' { |current| 'world' }
   def cas(k, ttl = nil, &blk)
-    @wrapper.cas k, extract_ttl(ttl), &blk
+    if blk and exist?(k)
+      old_v = get k
+      new_v = blk.call old_v
+      set k, new_v, extract_ttl(ttl)
+      new_v
+    end
   end
-  
+
   alias :compare_and_swap :cas
-  
+
   # Get stats.
   #
   # Example:
   #     cache.stats
   def stats
-    @wrapper.stats
+    handle_fork
+    _stats
   end
 
-  # Get multiple cache entries.
-  #
-  # Example:
-  #     cache.get_multi 'hello', 'privyet'
-  def get_multi(*ks)
-    @wrapper.get_multi ks
-  end
-  
-  # Like get, but accepts :expires_in for compatibility with Rails.
-  #
-  # In general, you should use get instead.
-  #
-  # Example:
-  #     cache.write 'hello', 'world', :expires_in => 5.minutes
-  def write(k, v, ttl = nil)
-    @wrapper.set k, v, extract_ttl(ttl)
-  end
-  
-  def read(k, ignored_options = nil) #:nodoc:
-    @wrapper.get k
-  end
-    
   private
   
+  def handle_fork
+    if ::Process.pid != @pid
+      @pid = ::Process.pid
+      after_fork
+    end
+  end
+
+  def after_fork
+    # nothing
+  end
+
   def extract_ttl(ttl)
     case ttl
     when ::Hash

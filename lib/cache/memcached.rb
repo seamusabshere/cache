@@ -1,4 +1,4 @@
-class Cache::Wrapper::Memcached < Cache::Wrapper
+module Cache::Memcached
   def thread_metal
     ::Thread.current["#{@pid}/#{self.class.name}/#{object_id}/thread_metal"] ||= @metal.clone
   end
@@ -38,9 +38,9 @@ class Cache::Wrapper::Memcached < Cache::Wrapper
   end
 
   # native
-  def cas(k, ttl, &blk)
+  def cas(k, ttl = nil, &blk)
     handle_fork
-    thread_metal.cas k, ttl, &blk
+    thread_metal.cas k, extract_ttl(ttl), &blk
   rescue ::Memcached::NotFound
   end
   # --

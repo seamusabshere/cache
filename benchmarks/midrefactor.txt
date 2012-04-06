@@ -1,0 +1,89 @@
+alzabo0:~/code/cache (master) $ ruby test/profile/benchmark.rb 
+Darwin alzabo0 10.8.0 Darwin Kernel Version 10.8.0: Tue Jun  7 16:32:41 PDT 2011; root:xnu-1504.15.3~1/RELEASE_X86_64 x86_64
+ruby 1.9.3p125 (2012-02-16 revision 34643) [x86_64-darwin10.8.0]
+RUBYOPT=-ropenssl
+RUBY_VERSION=ruby-1.9.3-p125
+Ruby 1.9.3p125
+Loaded memcached 1.4.1
+Loaded memcache-client 1.8.5
+Loaded cache 0.2.6
+Loaded kgio 2.7.4
+Loaded dalli 2.0.2
+Loops is 20000
+Stack depth is 0
+Small value size is: 19 bytes
+Large value size is: 4189 bytes
+No matching processes belonging to you were found
+                                           user     system      total        real
+set: cache:dalli:bin                   2.200000   0.830000   3.030000 (  3.818512)
+set: cache:libm:bin                    0.630000   0.550000   1.180000 (  2.579593)
+set: dalli:bin                         2.080000   0.830000   2.910000 (  3.709548)
+set: libm:ascii                        0.290000   0.520000   0.810000 (  2.175071)
+set: libm:ascii:pipeline               0.100000   0.010000   0.110000 (  0.105957)
+set: libm:ascii:udp                    0.200000   0.310000   0.510000 (  1.116366)
+set: libm:bin                          0.190000   0.480000   0.670000 (  1.779256)
+set: libm:bin:buffer                   0.080000   0.160000   0.240000 (  0.313709)
+set: mclient:ascii                     4.310000   0.830000   5.140000 (  5.211834)
+
+get: cache:dalli:bin                   2.070000   0.900000   2.970000 (  3.678416)
+get: cache:libm:bin                    0.580000   0.680000   1.260000 (  2.372081)
+get: dalli:bin                         1.940000   0.900000   2.840000 (  3.548862)
+get: libm:ascii                        0.340000   0.490000   0.830000 (  1.850806)
+get: libm:ascii:pipeline               0.350000   0.680000   1.030000 (  2.187457)
+get: libm:ascii:udp                    0.260000   0.330000   0.590000 (  1.062001)
+get: libm:bin                          0.260000   0.670000   0.930000 (  1.963878)
+get: libm:bin:buffer                   0.300000   0.930000   1.230000 (  2.021582)
+get: mclient:ascii                     5.120000   0.850000   5.970000 (  6.057993)
+
+delete: cache:dalli:bin                1.900000   0.880000   2.780000 (  3.450546)
+delete: cache:libm:bin                 0.720000   0.670000   1.390000 (  2.628000)
+delete: dalli:bin                      1.730000   0.870000   2.600000 (  3.278894)
+delete: libm:ascii                     0.610000   0.580000   1.190000 (  2.382143)
+delete: libm:ascii:pipeline            0.070000   0.000000   0.070000 (  0.077245)
+delete: libm:ascii:udp                 0.500000   0.380000   0.880000 (  1.311811)
+delete: libm:bin                       0.590000   0.570000   1.160000 (  2.325502)
+delete: libm:bin:buffer                0.580000   0.810000   1.390000 (  2.347620)
+delete: mclient:ascii                  4.150000   0.810000   4.960000 (  5.022691)
+
+get-missing: cache:dalli:bin           1.830000   0.870000   2.700000 (  3.410744)
+get-missing: cache:libm:bin            0.730000   0.730000   1.460000 (  2.553246)
+get-missing: dalli:bin                 1.710000   0.870000   2.580000 (  3.294497)
+get-missing: libm:ascii                0.670000   0.650000   1.320000 (  2.522556)
+get-missing: libm:ascii:pipeline       0.650000   0.780000   1.430000 (  2.408539)
+get-missing: libm:ascii:udp            0.530000   0.390000   0.920000 (  1.347747)
+get-missing: libm:bin                  0.640000   0.730000   1.370000 (  2.514046)
+get-missing: libm:bin:buffer           0.650000   0.880000   1.530000 (  2.530509)
+get-missing: mclient:ascii             4.230000   0.820000   5.050000 (  5.119931)
+
+set-large: cache:dalli:bin             2.560000   0.880000   3.440000 (  4.314613)
+set-large: cache:libm:bin              0.900000   0.650000   1.550000 (  3.082473)
+set-large: dalli:bin                   2.450000   0.870000   3.320000 (  4.192634)
+set-large: libm:ascii                  0.320000   0.520000   0.840000 (  2.383214)
+set-large: libm:ascii:pipeline         0.160000   0.150000   0.310000 (  0.313549)
+set-large: libm:ascii:udp              0.230000   0.360000   0.590000 (  1.254392)
+set-large: libm:bin                    0.230000   0.520000   0.750000 (  2.106144)
+set-large: libm:bin:buffer             0.130000   0.250000   0.380000 (  0.448009)
+set-large: mclient:ascii               4.540000   0.860000   5.400000 (  5.492006)
+
+get-large: cache:dalli:bin             2.320000   0.980000   3.300000 (  4.028261)
+get-large: cache:libm:bin              3.480000   0.850000   4.330000 (  5.709700)
+get-large: dalli:bin                   2.200000   0.980000   3.180000 (  3.916877)
+get-large: libm:ascii                  0.380000   0.640000   1.020000 (  2.054989)
+get-large: libm:ascii:pipeline         0.380000   0.760000   1.140000 (  1.999273)
+get-large: libm:ascii:udp              0.330000   0.460000   0.790000 (  1.286472)
+get-large: libm:bin                    0.330000   0.860000   1.190000 (  2.282758)
+get-large: libm:bin:buffer             0.360000   1.090000   1.450000 (  2.388201)
+get-large: mclient:ascii               5.870000   1.070000   6.940000 (  7.044938)
+
+hash:default                           0.190000   0.000000   0.190000 (  0.198824)
+hash:md5                               0.370000   0.000000   0.370000 (  0.361487)
+hash:crc                               0.210000   0.000000   0.210000 (  0.219091)
+hash:fnv1_64                           0.150000   0.000000   0.150000 (  0.155696)
+hash:fnv1a_64                          0.140000   0.000000   0.140000 (  0.135878)
+hash:fnv1_32                           0.140000   0.000000   0.140000 (  0.138691)
+hash:fnv1a_32                          0.130000   0.000000   0.130000 (  0.136036)
+hash:hsieh                             0.060000   0.000000   0.060000 (  0.059796)
+hash:murmur                            0.090000   0.000000   0.090000 (  0.088340)
+hash:jenkins                           0.100000   0.000000   0.100000 (  0.102807)
+hash:none                              0.050000   0.000000   0.050000 (  0.059193)
+alzabo0:~/code/cache (master) $ 

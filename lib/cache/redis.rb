@@ -1,4 +1,4 @@
-class Cache::Wrapper::Redis < Cache::Wrapper
+module Cache::Redis
   def _get(k)
     if cached_v = @metal.get(k) and cached_v.is_a?(::String)
       ::Marshal.load cached_v
@@ -10,7 +10,6 @@ class Cache::Wrapper::Redis < Cache::Wrapper
       memo[k] = @metal.get(k) if @metal.exist?(k)
       memo
     end
-
   end
 
   def _set(k, v, ttl)

@@ -1,4 +1,4 @@
-class Cache::Wrapper::DalliClient < Cache::Wrapper
+module Cache::DalliClient
   def after_fork
     @metal.close
   end
@@ -33,14 +33,14 @@ class Cache::Wrapper::DalliClient < Cache::Wrapper
   end
 
   # native
-  def fetch(k, ttl, &blk)
+  def fetch(k, ttl = nil, &blk)
     handle_fork
-    @metal.fetch k, ttl, &blk
+    @metal.fetch k, extract_ttl(ttl), &blk
   end
 
-  def cas(k, ttl, &blk)
+  def cas(k, ttl = nil, &blk)
     handle_fork
-    @metal.cas k, ttl, &blk
+    @metal.cas k, extract_ttl(ttl), &blk
   end
   # --
 end

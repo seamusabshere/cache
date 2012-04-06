@@ -1,4 +1,4 @@
-class Cache::Wrapper::MemCache < Cache::Wrapper
+module Cache::MemCache
   def after_fork
     @metal.reset
   end
@@ -33,9 +33,9 @@ class Cache::Wrapper::MemCache < Cache::Wrapper
   end
 
   # native
-  def fetch(k, ttl, &blk)
+  def fetch(k, ttl = nil, &blk)
     handle_fork
-    @metal.fetch k, ttl, &blk
+    @metal.fetch k, extract_ttl(ttl), &blk
   end
   # --
 end

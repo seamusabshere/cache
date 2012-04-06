@@ -1,8 +1,8 @@
-class Cache::Wrapper::ActiveSupportCacheStore < Cache::Wrapper
+module Cache::ActiveSupportCacheStore
   # native
-  def fetch(k, ttl, &blk)
+  def fetch(k, ttl = nil, &blk)
     handle_fork
-    @metal.fetch k, { :expires_in => ttl }, &blk
+    @metal.fetch k, { :expires_in => extract_ttl(ttl) }, &blk
   end
   # --
 
@@ -33,9 +33,5 @@ class Cache::Wrapper::ActiveSupportCacheStore < Cache::Wrapper
   def _exist?(k)
     @metal.exist? k
     # !get(k).nil?
-  end
-
-  def _stats
-    @metal.stats
   end
 end

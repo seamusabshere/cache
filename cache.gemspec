@@ -21,13 +21,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activesupport', '>=2.3.11' # for default memory store
   s.add_dependency 'i18n' # activesupport
-  s.add_development_dependency 'yard'
-  s.add_development_dependency 'test-unit'
-  s.add_development_dependency 'redis'
-  s.add_development_dependency 'redis-namespace'
-  s.add_development_dependency 'dalli'
-  s.add_development_dependency 'memcached'
-  s.add_development_dependency 'memcache-client'
-  s.add_development_dependency 'rake'
 end
 

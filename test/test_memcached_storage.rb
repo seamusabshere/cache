@@ -10,7 +10,7 @@ class TestMemcachedStorage < Test::Unit::TestCase
   include SharedTests
   
   def get_bare_id
-    @cache.instance_variable_get(:@wrapper).thread_metal.object_id
+    @cache.thread_metal.object_id
   end
   
   def test_treats_as_not_thread_safe
