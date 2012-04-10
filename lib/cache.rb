@@ -24,6 +24,9 @@ class Cache
   attr_reader :config
   attr_reader :metal
 
+  # For compatibility with Rails 2.x
+  attr_accessor :logger
+
   def initialize(metal = nil) #:nodoc:
     @pid = ::Process.pid
     @config = Config.new self
