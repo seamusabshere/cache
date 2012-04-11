@@ -1,3 +1,9 @@
+0.3.2 / 2012-04-11
+
+* Enhancements
+
+  * Compatibility with Rails 3.2.x that uses ActiveSupport::Cache::FileStore
+
 0.3.1 / 2012-04-10
 
 * Bug fixes

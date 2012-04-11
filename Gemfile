@@ -1,4 +1,4 @@
-source "http://rubygems.org"
+source :rubygems
 
 # Specify your gem's dependencies in cache.gemspec
 gemspec
@@ -10,3 +10,4 @@ gem 'dalli'
 gem 'memcached'
 gem 'memcache-client'
 gem 'rake'
+gem 'rack' # for ActiveSupport::Cache::FileStore of all things
