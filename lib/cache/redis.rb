@@ -1,4 +1,8 @@
 module Cache::Redis
+  def after_fork
+    @metal.quit
+  end
+  
   def _get(k)
     if cached_v = @metal.get(k) and cached_v.is_a?(::String)
       ::Marshal.load cached_v
@@ -7,7 +11,9 @@ module Cache::Redis
 
   def _get_multi(ks)
     ks.inject({}) do |memo, k|
-      memo[k] = @metal.get(k) if @metal.exist?(k)
+      if v = _get(k)
+        memo[k] = v
+      end
       memo
     end
   end
@@ -25,7 +31,7 @@ module Cache::Redis
   end
 
   def _flush
-    @metal.flush
+    @metal.flushdb
   end
 
   def _exist?(k)
@@ -33,6 +39,6 @@ module Cache::Redis
   end
 
   def _stats
-    @metal.stats
+    @metal.info
   end
 end

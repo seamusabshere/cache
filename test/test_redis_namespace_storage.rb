@@ -1,11 +1,12 @@
 require 'helper'
 
 require 'redis'
-require 'uri'
+require 'redis-namespace'
 
-class TestRedisStorage < Test::Unit::TestCase
+class TestRedisNamespaceStorage < Test::Unit::TestCase
   def raw_client
-    Redis.new#(:host => uri.host, :port => uri.port, :password => uri.password)
+    r = Redis.new
+    Redis::Namespace.new(:test_cache, :redis => r)
   end
   
   include SharedTests

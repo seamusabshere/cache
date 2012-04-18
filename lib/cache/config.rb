@@ -4,13 +4,6 @@ class Cache
   # Example:
   #     cache.config.default_ttl = 120 # seconds
   class Config
-    
-    attr_reader :parent
-    
-    def initialize(parent) #:nodoc:
-      @parent = parent
-    end
-    
     # TTL for method caches. Defaults to 60 seconds.
     #
     # Example:

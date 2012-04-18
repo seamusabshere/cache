@@ -7,7 +7,9 @@ gem 'test-unit'
 gem 'redis'
 gem 'redis-namespace'
 gem 'dalli'
-gem 'memcached'
+unless RUBY_PLATFORM == 'java'
+  gem 'memcached'
+end
 gem 'memcache-client'
 gem 'rake'
 gem 'rack' # for ActiveSupport::Cache::FileStore of all things

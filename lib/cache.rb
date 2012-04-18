@@ -29,7 +29,7 @@ class Cache
 
   def initialize(metal = nil) #:nodoc:
     @pid = ::Process.pid
-    @config = Config.new self
+    @config = Config.new
     @metal = if metal.is_a?(Cache)
       metal.metal
     elsif metal

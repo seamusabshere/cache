@@ -1,3 +1,13 @@
+0.3.3 / 2012-04-17
+
+* Enhancements
+
+  * Test on MRI 1.8, MRI 1.9, and JRuby 1.6.7+
+
+* Bug fixes
+
+  * Fix Redis support. Tests were silently failing, made them loud and then fixed 'em.
+
 0.3.2 / 2012-04-11
 
 * Enhancements
