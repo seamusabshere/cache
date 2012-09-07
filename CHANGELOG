@@ -1,3 +1,9 @@
+unreleased
+
+* Bug fixes
+
+  * Properly handle redis forking
+
 0.3.3 / 2012-04-17
 
 * Enhancements
