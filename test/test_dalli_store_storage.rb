@@ -1,7 +1,6 @@
 require 'helper'
 
 require 'dalli'
-require 'active_support/all'
 require 'active_support/cache/dalli_store'
 
 class TestDalliStoreStorage < Test::Unit::TestCase

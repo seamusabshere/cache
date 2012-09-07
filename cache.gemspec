@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "cache/version"
+require File.expand_path('../lib/cache/version', __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "cache"
@@ -19,7 +18,16 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency 'activesupport', '>=2.3.11' # for default memory store
-  s.add_dependency 'i18n' # activesupport
+  s.add_development_dependency 'activesupport', '>=2.3.11' # for default memory store
+  s.add_development_dependency 'yard'
+  s.add_development_dependency 'test-unit'
+  s.add_development_dependency 'redis'
+  s.add_development_dependency 'redis-namespace'
+  s.add_development_dependency 'dalli'
+  unless RUBY_PLATFORM == 'java'
+    s.add_development_dependency 'memcached'
+  end
+  s.add_development_dependency 'memcache-client'
+  s.add_development_dependency 'rack' # for ActiveSupport::Cache::FileStore of all things
 end
 

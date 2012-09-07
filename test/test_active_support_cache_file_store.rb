@@ -2,7 +2,7 @@ require 'helper'
 require 'tmpdir'
 require 'fileutils'
 
-require 'active_support/all'
+require 'active_support/cache'
 require 'active_support/cache/file_store'
 
 class TestActiveSupportCacheFileStore < Test::Unit::TestCase

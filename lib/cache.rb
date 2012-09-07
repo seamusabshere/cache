@@ -1,4 +1,3 @@
-require 'active_support/core_ext'
 require 'cache/config'
 
 class Cache
@@ -42,7 +41,8 @@ class Cache
       ::ActiveSupport::Cache::MemoryStore.new
     end
     metal_class = @metal.class.name.delete('::') # Memcached::Rails -> 'MemcachedRails'
-    require "cache/#{metal_class.underscore}"
+    # non-ActiveSupport underscore per http://stackoverflow.com/questions/1509915/converting-camel-case-to-underscore-case-in-ruby
+    require "cache/#{metal_class.gsub(/(.)([A-Z])/,'\1_\2').downcase}"
     extend Cache.const_get(metal_class)
   end
 

@@ -1,4 +1,12 @@
-unreleased
+0.4.0 / 2012-09-07
+
+* Breaking changes
+
+  * You have to include activesupport in your Gemfile if you use the default cache store
+
+* Enhancements
+
+  * Remove dependency on ActiveSupport (unless you want the default cache store)
 
 * Bug fixes
 
