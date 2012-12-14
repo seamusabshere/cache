@@ -203,8 +203,8 @@ end
 It defaults to an in-process memory store:
 
     @cache = Cache.new
-    @cache.set 'hello'
-    @cache.get 'hello', 'world'
+    @cache.set 'hello', 'world'
+    @cache.get 'hello'
 
 You can specify a more useful cache client:
 
