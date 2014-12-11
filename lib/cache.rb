@@ -36,6 +36,7 @@ class Cache
     elsif defined?(::Rails) and ::Rails.respond_to?(:cache) and rails_cache = ::Rails.cache
       rails_cache
     else
+      require 'active_support'
       require 'active_support/cache'
       require 'active_support/cache/memory_store'
       ::ActiveSupport::Cache::MemoryStore.new
