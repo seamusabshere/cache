@@ -1,3 +1,7 @@
+# ymmv
+
+Update August 2015: If you are looking for locking and caching methods, [lock_and_cache](https://github.com/seamusabshere/lock_and_cache) is a simpler alternative that is redis-only.
+
 # cache
 
 Wraps memcached, redis, memcache-client, dalli and handles their weirdnesses, including forking.
